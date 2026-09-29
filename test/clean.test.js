@@ -19,7 +19,6 @@ function buildFixture() {
   const costos = [
     { codigoProducto: "CAF-BLEND-1K", periodo: "01/2025", costoUnitario: 10000, moneda: "ARS" },
     { codigoProducto: "CAF-BRAS-250", periodo: "01/2025", costoUnitario: 2500, moneda: "ARS" },
-    // a proposito no hay costo cargado para 02/2025, para probar el warning
   ];
   const ventas = [
     { fecha: "2025-01-05", periodo: "01/2025", comprobante: "F1", tipoComprobante: "FAC", codigoCliente: "C1", razonSocial: "Cliente Uno", codigoProducto: "BLEND1K", cantidad: 5, precioUnitario: 20000, bonificacionPct: 0, importe: 100000, vendedor: null },
@@ -44,10 +43,10 @@ test("enriquecerVentas resuelve codigo legado, cruza costo por producto+periodo 
 
 test("enriquecerVentas no rompe si falta el costo del periodo: usa costo 0 y lo marca como no confiable", () => {
   const { ventas, warnings } = enriquecerVentas(buildFixture());
-  const v3 = ventas[2]; // periodo 02/2025, sin costo cargado
+  const v3 = ventas[2];
   assert.equal(v3.costoConocido, false);
   assert.equal(v3.costoTotal, 0);
-  assert.equal(v3.margenBruto, 40000); // margen sobrestimado a proposito, documentado via warning
+  assert.equal(v3.margenBruto, 40000);
   assert.ok(warnings.some((w) => w.includes("CAF-BLEND-1K@02/2025")));
 });
 

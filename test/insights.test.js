@@ -6,9 +6,6 @@ function porId(insights, id) {
   return insights.find((i) => i.id === id);
 }
 
-// Escenario "alarmante": el periodo cierra en rojo en el acumulado, un
-// cliente concentra mas de 1/4 de la facturacion, el flete crece fuerte y el
-// producto con mejor margen % no es la linea Blend Casa.
 function fixtureAlarmante() {
   return {
     mensual: [
@@ -28,9 +25,6 @@ function fixtureAlarmante() {
   };
 }
 
-// Escenario "en orden": ingresos y resultado neto crecen juntos, ningun
-// cliente concentra mas de 1/4, Blend Casa es el mas rentable en ambos
-// sentidos, el flete esta estable y las devoluciones estan repartidas.
 function fixtureEnOrden() {
   const clientes = ["K1", "K2", "K3", "K4", "K5"].map((codigo, i) => ({
     codigo,
@@ -64,52 +58,51 @@ function fixtureEnOrden() {
 }
 
 test("escenario alarmante: prioriza el balance en rojo del periodo, detecta concentracion de cliente y flete creciente", () => {
-  const { estadoDeNegocio, accionesSemana } = generarInsights(fixtureAlarmante());
+  const { accionables } = generarInsights(fixtureAlarmante());
 
-  const balance = porId(estadoDeNegocio, "balance-periodo");
+  const balance = porId(accionables, "balance-periodo");
   assert.ok(balance, "deberia reportar que el acumulado del periodo cierra en rojo");
   assert.equal(balance.severity, "critical");
   assert.ok(balance.detalle.includes("feb 2025"));
 
-  const concentracion = porId(estadoDeNegocio, "concentracion-cliente");
+  const concentracion = porId(accionables, "concentracion-cliente");
   assert.ok(concentracion.titulo.includes("Cliente Grande"));
 
-  const flete = porId(estadoDeNegocio, "flete-no-facturado");
+  const flete = porId(accionables, "flete-no-facturado");
   assert.equal(flete.severity, "warning");
   assert.ok(flete.accion);
 
-  const ancla = porId(estadoDeNegocio, "producto-ancla");
+  const ancla = porId(accionables, "producto-ancla");
   assert.ok(ancla.detalle.includes("Brasil 250g"));
   assert.ok(ancla.accion, "si Blend Casa no es el mas rentable en % deberia sugerir una accion");
 
-  // orden de acciones por severidad: critica primero, luego las dos de
-  // atencion (en el orden en que se generaron), y la de contexto al final
   assert.deepEqual(
-    accionesSemana.map((i) => i.id),
+    accionables.map((i) => i.id),
     ["balance-periodo", "concentracion-cliente", "flete-no-facturado", "producto-ancla"]
   );
 });
 
-test("escenario en orden: no genera alarmas ni acciones cuando los numeros no las ameritan", () => {
-  const { estadoDeNegocio, accionesSemana } = generarInsights(fixtureEnOrden());
+test("escenario en orden: informa todo igual, ordenado por severidad, aunque nada amerite una accion concreta", () => {
+  const { accionables } = generarInsights(fixtureEnOrden());
 
-  const balance = porId(estadoDeNegocio, "balance-periodo");
+  const balance = porId(accionables, "balance-periodo");
   assert.ok(balance, "deberia informar el balance aunque sea buena noticia");
   assert.equal(balance.severity, "info");
   assert.equal(balance.accion, null);
 
-  assert.equal(porId(estadoDeNegocio, "concentracion-cliente"), undefined);
-  assert.equal(porId(estadoDeNegocio, "margen-delgado"), undefined);
-  assert.equal(porId(estadoDeNegocio, "devoluciones-producto"), undefined);
+  assert.equal(porId(accionables, "concentracion-cliente"), undefined);
+  assert.equal(porId(accionables, "margen-delgado"), undefined);
+  assert.equal(porId(accionables, "devoluciones-producto"), undefined);
 
-  const ancla = porId(estadoDeNegocio, "producto-ancla");
+  const ancla = porId(accionables, "producto-ancla");
   assert.ok(ancla, "igual deberia informar cual es el producto ancla, aunque sea buena noticia");
   assert.equal(ancla.severity, "info");
   assert.equal(ancla.accion, null);
 
-  assert.ok(porId(estadoDeNegocio, "canal-online"));
-  assert.ok(porId(estadoDeNegocio, "devoluciones-generales"));
+  assert.ok(porId(accionables, "canal-online"));
+  assert.ok(porId(accionables, "devoluciones-generales"));
+  assert.ok(porId(accionables, "flete-no-facturado"));
 
-  // ninguno de los insights de este escenario trae una accion concreta
-  assert.deepEqual(accionesSemana, []);
+  assert.equal(accionables.length, 5);
+  assert.ok(accionables.every((i) => i.accion === null));
 });

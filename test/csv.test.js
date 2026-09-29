@@ -11,8 +11,6 @@ test("parsea filas simples separadas por ;", () => {
 });
 
 test("respeta un delimitador dentro de comillas dobles", () => {
-  // este es el caso real de gastos_operativos.csv: la columna "notas" trae
-  // un ";" dentro de comillas, y no debe partirse en dos campos.
   const csv = 'periodo;concepto;importe;notas\n01/2025;Flete;100;"reparto a cafeterias; no se cobra"\n';
   const rows = parseCsv(csv);
   assert.equal(rows.length, 1);

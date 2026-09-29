@@ -1,18 +1,75 @@
 import { escapeHtml } from "../lib/html.js";
-import { fmtMoney, fmtPct, fmtInt } from "../lib/parse.js";
+import { fmtMoney, fmtPct, fmtInt, periodoOrdinal } from "../lib/parse.js";
 import { lineChart, barChart, divergingBarChart, legendHtml } from "./charts.js";
 
 const SEVERITY_META = {
-  critical: { color: "var(--status-critical)", bg: "var(--status-critical-bg)", label: "Urgente" },
-  warning: { color: "var(--status-warning)", bg: "var(--status-warning-bg)", label: "Atención" },
-  info: { color: "var(--status-info)", bg: "var(--status-info-bg)", label: "Contexto" },
+  critical: { color: "var(--status-critical)", bg: "var(--status-critical-bg)", ring: "var(--status-critical-ring)", label: "Urgente" },
+  warning: { color: "var(--status-warning)", bg: "var(--status-warning-bg)", ring: "var(--status-warning-ring)", label: "Atención" },
+  info: { color: "var(--status-info)", bg: "var(--status-info-bg)", ring: "var(--status-info-ring)", label: "Contexto" },
 };
+
+const NAV_ITEMS = [
+  { id: "resumen", href: "index.html", label: "Resumen" },
+  { id: "acciones", href: "acciones.html", label: "Acciones" },
+  { id: "gastos", href: "gastos.html", label: "Gastos" },
+  { id: "productos", href: "productos.html", label: "Productos" },
+  { id: "clientes", href: "clientes.html", label: "Clientes y canales" },
+  { id: "devoluciones", href: "devoluciones.html", label: "Devoluciones" },
+  { id: "notas", href: "notas.html", label: "Notas y supuestos" },
+];
+
+const PAGE_ACTIONS_HTML = `<div class="page-actions">
+  <a href="index.html?print=1" class="btn-ghost" data-print-target="index.html">⬇ Resumen (PDF)</a>
+  <a href="reporte-completo.html?print=1" class="btn-ghost" data-print-target="reporte-completo.html">⬇ Reporte completo (PDF)</a>
+</div>`;
+
+const SITE_SCRIPT = `(function () {
+  var params = new URLSearchParams(location.search);
+  if (params.get("print") === "1") {
+    window.addEventListener("load", function () { window.print(); });
+  }
+
+  var currentFile = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll("[data-print-target]").forEach(function (btn) {
+    if (btn.getAttribute("data-print-target") === currentFile) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.print();
+      });
+    }
+  });
+
+  document.querySelectorAll(".data-table").forEach(function (tbl) {
+    var headers = tbl.querySelectorAll("th");
+    headers.forEach(function (th, colIndex) {
+      th.addEventListener("click", function () {
+        var tbody = tbl.querySelector("tbody");
+        var rows = Array.from(tbody.querySelectorAll("tr"));
+        var asc = th.getAttribute("data-sort") !== "asc";
+        headers.forEach(function (h) { h.removeAttribute("data-sort"); });
+        th.setAttribute("data-sort", asc ? "asc" : "desc");
+        rows.sort(function (a, b) {
+          var av = a.children[colIndex].getAttribute("data-value");
+          var bv = b.children[colIndex].getAttribute("data-value");
+          var an = parseFloat(av);
+          var bn = parseFloat(bv);
+          var cmp = !isNaN(an) && !isNaN(bn) ? an - bn : String(av).localeCompare(String(bv), "es");
+          return asc ? cmp : -cmp;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+      });
+    });
+  });
+})();`;
 
 function table(headers, rows) {
   return `<div class="table-wrap"><table class="data-table"><thead><tr>${headers
     .map((h) => `<th>${escapeHtml(h)}</th>`)
     .join("")}</tr></thead><tbody>${rows
-    .map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(String(c))}</td>`).join("")}</tr>`)
+    .map(
+      (r) =>
+        `<tr>${r.map((c) => `<td data-value="${escapeHtml(String(c.value))}">${escapeHtml(c.text)}</td>`).join("")}</tr>`
+    )
     .join("")}</tbody></table></div>`;
 }
 
@@ -26,26 +83,69 @@ function kpiCard(label, value, sublabel = "") {
 
 function insightCard(insight, index) {
   const meta = SEVERITY_META[insight.severity] ?? SEVERITY_META.info;
-  return `<div class="insight-card" style="border-left-color:${meta.color}">
+  const color = escapeHtml(meta.color);
+  const bg = escapeHtml(meta.bg);
+  const ring = escapeHtml(meta.ring);
+  return `<div class="insight-card" style="border-left-color:${color}">
     <div class="insight-head">
       ${index !== undefined ? `<span class="insight-index">${index}</span>` : ""}
-      <span class="badge" style="background:${meta.bg};color:${meta.color}">${meta.label}</span>
+      <span class="badge" style="background:${bg};color:${color};box-shadow:inset 0 0 0 1px ${ring}">${escapeHtml(meta.label)}</span>
       <h3 class="insight-title">${escapeHtml(insight.titulo)}</h3>
     </div>
     <p class="insight-detail">${escapeHtml(insight.detalle)}</p>
-    ${insight.accion ? `<p class="insight-action"><strong>Acción sugerida:</strong> ${escapeHtml(insight.accion)}</p>` : ""}
+    ${insight.accion ? `<p class="insight-action"><span class="insight-action-label">→ Acción sugerida</span> ${escapeHtml(insight.accion)}</p>` : ""}
   </div>`;
 }
 
-function section(id, title, content, subtitle = "") {
-  return `<section id="${id}" class="section">
-    <h2>${escapeHtml(title)}</h2>
-    ${subtitle ? `<p class="section-subtitle">${escapeHtml(subtitle)}</p>` : ""}
-    ${content}
-  </section>`;
+function topbarHtml(activeId) {
+  const links = NAV_ITEMS.map((item) => {
+    const isActive = item.id === activeId;
+    return `<a href="${item.href}"${isActive ? ' class="active" aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`;
+  }).join("");
+  return `<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">Sawy</span><span class="brand-sep">·</span><span class="brand-client">Tostadero Ruta 9</span>
+    </a>
+    <div class="topbar-links">${links}</div>
+  </div>
+</nav>`;
 }
 
-export function renderDashboard({ metrics, insights, warnings, meta }) {
+function pageHead({ eyebrow, title, subtitle, extraHtml }) {
+  return `<header class="page-head">
+  <div class="page-head-inner">
+    ${eyebrow ? `<p class="eyebrow">${escapeHtml(eyebrow)}</p>` : ""}
+    <h1>${escapeHtml(title)}</h1>
+    ${subtitle ? `<p class="page-head-subtitle">${escapeHtml(subtitle)}</p>` : ""}
+    ${extraHtml || ""}
+    ${PAGE_ACTIONS_HTML}
+  </div>
+</header>`;
+}
+
+function pageShell({ activeId, docTitle, headHtml, bodyHtml }) {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(docTitle)}</title>
+<style>${CSS}</style>
+</head>
+<body>
+${topbarHtml(activeId)}
+${headHtml}
+<main class="page-main">
+${bodyHtml}
+</main>
+<footer class="page-footer">Sawy · reporte para Tostadero Ruta 9</footer>
+<script>${SITE_SCRIPT}</script>
+</body>
+</html>`;
+}
+
+export function renderSite({ metrics, insights, warnings, meta }) {
   const { mensual, porProducto, porCanal, porCliente, gastosPorConcepto, devoluciones } = metrics;
   const primero = mensual[0];
   const ultimo = mensual[mensual.length - 1];
@@ -53,13 +153,15 @@ export function renderDashboard({ metrics, insights, warnings, meta }) {
   const margenTotal = mensual.reduce((a, m) => a + m.margenBruto, 0);
   const resultadoTotal = mensual.reduce((a, m) => a + m.resultadoNeto, 0);
 
-  // Se muestran 3 graficos separados, no uno solo con las 3 series: en un
-  // solo eje, ingresos (~decenas de millones) aplastan a margen bruto y
-  // sobre todo a resultado neto (que ronda el cero) hasta hacerlos
-  // ilegibles. Ingresos y margen bruto comparten orden de magnitud; margen
-  // bruto y gastos operativos comparten orden de magnitud (y su distancia
-  // ES el resultado neto); y el resultado neto se ve mejor como barras
-  // arriba/abajo de cero que como una linea casi plana.
+  const headline = insights.accionables.find((i) => i.id === "balance-periodo") ?? insights.accionables[0];
+  const headlineMeta = headline ? SEVERITY_META[headline.severity] ?? SEVERITY_META.info : null;
+  const heroTldrHtml = headline
+    ? `<div class="hero-tldr" style="border-left-color:${escapeHtml(headlineMeta.color)}">
+      <span class="badge" style="background:${escapeHtml(headlineMeta.bg)};color:${escapeHtml(headlineMeta.color)};box-shadow:inset 0 0 0 1px ${escapeHtml(headlineMeta.ring)}">${escapeHtml(headlineMeta.label)}</span>
+      <p class="hero-tldr-text">${escapeHtml(headline.titulo)}</p>
+    </div>`
+    : "";
+
   const ingresosMargenSeries = [
     { name: "Ingresos", color: "var(--series-ingresos)", values: mensual.map((m) => m.ingresos) },
     { name: "Margen bruto", color: "var(--series-margen)", values: mensual.map((m) => m.margenBruto) },
@@ -124,47 +226,49 @@ export function renderDashboard({ metrics, insights, warnings, meta }) {
     ariaLabel: "Facturación por cliente, top 8",
   });
 
-  const estadoNegocioHtml = insights.estadoDeNegocio.map((i) => insightCard(i)).join("");
-  const accionesHtml = insights.accionesSemana.map((i, idx) => insightCard(i, idx + 1)).join("");
+  const accionesHtml = insights.accionables.map((i, idx) => insightCard(i, idx + 1)).join("");
 
   const productosTabla = table(
     ["Producto", "Rubro", "Facturación", "Margen bruto", "Margen %", "% del total", "Devoluciones"],
     [...porProducto]
       .sort((a, b) => b.ingresos - a.ingresos)
       .map((p) => [
-        p.descripcion,
-        p.rubro,
-        fmtMoney(p.ingresos),
-        fmtMoney(p.margenBruto),
-        fmtPct(p.margenBrutoPct),
-        fmtPct(p.participacionIngresos),
-        p.devolucionImporte > 0 ? `${fmtMoney(p.devolucionImporte)} (${fmtPct(p.devolucionPct)})` : "—",
+        { text: p.descripcion, value: p.descripcion },
+        { text: p.rubro, value: p.rubro },
+        { text: fmtMoney(p.ingresos), value: p.ingresos },
+        { text: fmtMoney(p.margenBruto), value: p.margenBruto },
+        { text: fmtPct(p.margenBrutoPct), value: p.margenBrutoPct },
+        { text: fmtPct(p.participacionIngresos), value: p.participacionIngresos },
+        {
+          text: p.devolucionImporte > 0 ? `${fmtMoney(p.devolucionImporte)} (${fmtPct(p.devolucionPct)})` : "—",
+          value: p.devolucionImporte,
+        },
       ])
   );
 
   const clientesTabla = table(
     ["Cliente", "Canal", "Facturación", "% del total", "Margen bruto", "Margen %", "Bonif. prom."],
     porCliente.map((c) => [
-      c.razonSocial,
-      c.canal,
-      fmtMoney(c.ingresos),
-      fmtPct(c.participacionIngresos),
-      fmtMoney(c.margenBruto),
-      fmtPct(c.margenBrutoPct),
-      fmtPct(c.bonifPromedioPonderada / 100),
+      { text: c.razonSocial, value: c.razonSocial },
+      { text: c.canal, value: c.canal },
+      { text: fmtMoney(c.ingresos), value: c.ingresos },
+      { text: fmtPct(c.participacionIngresos), value: c.participacionIngresos },
+      { text: fmtMoney(c.margenBruto), value: c.margenBruto },
+      { text: fmtPct(c.margenBrutoPct), value: c.margenBrutoPct },
+      { text: fmtPct(c.bonifPromedioPonderada / 100), value: c.bonifPromedioPonderada },
     ])
   );
 
   const mensualTabla = table(
     ["Mes", "Ingresos", "Costo mercadería", "Margen bruto", "Margen %", "Gastos operativos", "Resultado neto"],
     mensual.map((m) => [
-      m.label,
-      fmtMoney(m.ingresos),
-      fmtMoney(m.costoTotal),
-      fmtMoney(m.margenBruto),
-      fmtPct(m.margenBrutoPct),
-      fmtMoney(m.gastosOperativos),
-      fmtMoney(m.resultadoNeto),
+      { text: m.label, value: periodoOrdinal(m.periodo) },
+      { text: fmtMoney(m.ingresos), value: m.ingresos },
+      { text: fmtMoney(m.costoTotal), value: m.costoTotal },
+      { text: fmtMoney(m.margenBruto), value: m.margenBruto },
+      { text: fmtPct(m.margenBrutoPct), value: m.margenBrutoPct },
+      { text: fmtMoney(m.gastosOperativos), value: m.gastosOperativos },
+      { text: fmtMoney(m.resultadoNeto), value: m.resultadoNeto },
     ])
   );
 
@@ -175,41 +279,8 @@ export function renderDashboard({ metrics, insights, warnings, meta }) {
           .join("")}</ul></div>`
       : `<div class="callout callout-ok">No se detectaron inconsistencias de cruce entre ventas, productos, clientes y costos en este export.</div>`;
 
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tostadero Ruta 9 — Visibilidad de negocio</title>
-<style>${CSS}</style>
-</head>
-<body>
-<header class="page-header">
-  <div class="page-header-inner">
-    <div>
-      <p class="eyebrow">Herramienta de visibilidad de negocio</p>
-      <h1>Tostadero Ruta 9</h1>
-      <p class="page-subtitle">Período analizado: ${escapeHtml(primero.label)} a ${escapeHtml(ultimo.label)} · generado el ${escapeHtml(meta.generadoEn)}</p>
-    </div>
-    <nav class="nav">
-      <a href="#resumen">Resumen</a>
-      <a href="#estado">Estado del negocio</a>
-      <a href="#gastos">Gastos</a>
-      <a href="#productos">Productos</a>
-      <a href="#clientes">Clientes y canales</a>
-      <a href="#devoluciones">Devoluciones</a>
-      <a href="#acciones">Acciones de la semana</a>
-      <a href="#notas">Notas y supuestos</a>
-    </nav>
-  </div>
-</header>
-
-<main class="page-main">
-
-${section(
-  "resumen",
-  "Resumen del período",
-  `<div class="kpi-grid">
+  const resumenBody = `<h2>Resumen del período</h2>
+  <div class="kpi-grid">
     ${kpiCard("Facturación total", fmtMoney(ingresosTotales), `${primero.label} a ${ultimo.label}`)}
     ${kpiCard("Margen bruto", fmtMoney(margenTotal), fmtPct(margenTotal / ingresosTotales) + " sobre facturación")}
     ${kpiCard("Resultado neto acumulado", fmtMoney(resultadoTotal), fmtPct(resultadoTotal / ingresosTotales) + " sobre facturación")}
@@ -224,138 +295,162 @@ ${section(
   <p class="chart-caption">La distancia entre estas dos líneas es, mes a mes, el resultado neto: cuanto más se acercan (o se cruzan), menos —o nada— queda libre.</p>
   <h3>Resultado neto por mes</h3>
   ${resultadoChart}
-  ${mensualTabla}`
-)}
+  ${mensualTabla}`;
 
-${section(
-  "estado",
-  "Estado del negocio",
-  `<div class="insight-list">${estadoNegocioHtml}</div>`,
-  "Lectura automática de los datos del período — no reemplaza el criterio de Sofía, lo informa con números."
-)}
+  const accionesBody = `<div class="insight-list">${accionesHtml || '<p class="chart-caption">No hay observaciones generadas por las reglas actuales para este período.</p>'}</div>`;
 
-${section(
-  "gastos",
-  "Gastos operativos",
-  `${gastosChart}
-  <p class="chart-caption">Total por concepto en todo el período (${escapeHtml(primero.label)} a ${escapeHtml(ultimo.label)}). El flete de distribución no se cobra a los clientes.</p>`
-)}
+  const gastosBody = `${gastosChart}
+  <p class="chart-caption">Total por concepto en todo el período (${escapeHtml(primero.label)} a ${escapeHtml(ultimo.label)}). El flete de distribución no se cobra a los clientes.</p>`;
 
-${section(
-  "productos",
-  "Productos",
-  `<h3>Margen bruto por producto</h3>
+  const productosBody = `<h3>Margen bruto por producto</h3>
   ${productosChart}
-  ${productosTabla}`
-)}
+  ${productosTabla}`;
 
-${section(
-  "clientes",
-  "Clientes y canales",
-  `<h3>Facturación por canal</h3>
+  const clientesBody = `<h3>Facturación por canal</h3>
   ${canalChart}
   <h3>Top 8 clientes por facturación</h3>
   ${clientesChart}
-  ${clientesTabla}`
-)}
+  ${clientesTabla}`;
 
-${section(
-  "devoluciones",
-  "Devoluciones (notas de crédito)",
-  `<div class="kpi-grid">
+  const devolucionesBody = `<div class="kpi-grid">
     ${kpiCard("Notas de crédito", fmtInt(devoluciones.cantidadNotas))}
     ${kpiCard("Importe devuelto", fmtMoney(devoluciones.totalImporte))}
     ${kpiCard("Unidades devueltas", fmtInt(devoluciones.totalUnidades))}
     ${kpiCard("% sobre ventas brutas", fmtPct(devoluciones.pctSobreVentasBrutas))}
   </div>
-  <p class="chart-caption">Sofía indica que las notas de crédito son café que se puso viejo en el mostrador del cliente.</p>`
-)}
+  <p class="chart-caption">Las notas de crédito registradas corresponden a café que se puso viejo en el mostrador del cliente.</p>`;
 
-${section(
-  "acciones",
-  "Acciones sugeridas para esta semana",
-  `<div class="insight-list">${accionesHtml || '<p class="chart-caption">No hay acciones críticas generadas por las reglas actuales para este período.</p>'}</div>`,
-  "Ordenadas por urgencia. Salen de las mismas reglas que arman \"Estado del negocio\"."
-)}
-
-${section(
-  "notas",
-  "Notas y supuestos",
-  `${warningsHtml}
+  const notasBody = `${warningsHtml}
   <div class="callout callout-info">
     <strong>Supuestos aplicados para poder calcular estos números:</strong>
     <ul>
-      <li>El código de producto legado <code>BLEND1K</code> (usado solo por Granos del Sur) se trató como el mismo producto que <code>CAF-BLEND-1K</code>, siguiendo el aviso de Sofía de que "quedaron códigos viejos dando vueltas".</li>
+      <li>El código de producto legado <code>BLEND1K</code> (usado solo por Granos del Sur) se trató como el mismo producto que <code>CAF-BLEND-1K</code>, por tratarse de un código de un sistema anterior.</li>
       <li>Los gastos operativos (incluido el flete) no están discriminados por producto en el export, así que se descuentan una sola vez a nivel de cada mes, no por línea de venta.</li>
       <li>El costo de mercadería de cada línea de venta se tomó del costo mensual del producto (costos.csv) correspondiente al mes de la fecha de venta.</li>
       <li>El canal comercial de cada venta es la "condición comercial" del cliente en clientes.csv (Distribuidor / Mayorista / Local / Ecommerce).</li>
       <li>La bonificación de cada línea de venta es la registrada en esa venta (no la del maestro de clientes), porque puede haber cambiado en el tiempo.</li>
     </ul>
-  </div>
-  <p class="build-meta">Generado a partir de ${fmtInt(meta.filas.ventas)} líneas de venta, ${fmtInt(meta.filas.clientes)} clientes y ${fmtInt(meta.filas.productos)} productos de <code>export_erp/</code>. Ver <code>sawy/README.md</code> para cómo regenerar este reporte.</p>`
-)}
+  </div>`;
 
-</main>
-<footer class="page-footer">Tostadero Ruta 9 · herramienta de visibilidad de negocio construida para la cátedra · datos sintéticos</footer>
-</body>
-</html>`;
+  const pages = {};
+
+  pages["index.html"] = pageShell({
+    activeId: "resumen",
+    docTitle: "Tostadero Ruta 9 — Resumen",
+    headHtml: pageHead({
+      eyebrow: "Herramienta de visibilidad de negocio",
+      title: "Tostadero Ruta 9",
+      subtitle: `Período analizado: ${primero.label} a ${ultimo.label} · generado el ${meta.generadoEn}`,
+      extraHtml: heroTldrHtml,
+    }),
+    bodyHtml: resumenBody,
+  });
+
+  pages["acciones.html"] = pageShell({
+    activeId: "acciones",
+    docTitle: "Tostadero Ruta 9 — Acciones",
+    headHtml: pageHead({
+      title: "Acciones",
+      subtitle: "Lectura automática de los datos del período, ordenada por urgencia — no reemplaza el criterio de negocio, lo informa con números.",
+    }),
+    bodyHtml: accionesBody,
+  });
+
+  pages["gastos.html"] = pageShell({
+    activeId: "gastos",
+    docTitle: "Tostadero Ruta 9 — Gastos operativos",
+    headHtml: pageHead({ title: "Gastos operativos" }),
+    bodyHtml: gastosBody,
+  });
+
+  pages["productos.html"] = pageShell({
+    activeId: "productos",
+    docTitle: "Tostadero Ruta 9 — Productos",
+    headHtml: pageHead({ title: "Productos" }),
+    bodyHtml: productosBody,
+  });
+
+  pages["clientes.html"] = pageShell({
+    activeId: "clientes",
+    docTitle: "Tostadero Ruta 9 — Clientes y canales",
+    headHtml: pageHead({ title: "Clientes y canales" }),
+    bodyHtml: clientesBody,
+  });
+
+  pages["devoluciones.html"] = pageShell({
+    activeId: "devoluciones",
+    docTitle: "Tostadero Ruta 9 — Devoluciones",
+    headHtml: pageHead({ title: "Devoluciones (notas de crédito)" }),
+    bodyHtml: devolucionesBody,
+  });
+
+  pages["notas.html"] = pageShell({
+    activeId: "notas",
+    docTitle: "Tostadero Ruta 9 — Notas y supuestos",
+    headHtml: pageHead({ title: "Notas y supuestos" }),
+    bodyHtml: notasBody,
+  });
+
+  pages["reporte-completo.html"] = pageShell({
+    activeId: null,
+    docTitle: "Tostadero Ruta 9 — Reporte completo",
+    headHtml: pageHead({
+      eyebrow: "Herramienta de visibilidad de negocio",
+      title: "Tostadero Ruta 9 — Reporte completo",
+      subtitle: `Período analizado: ${primero.label} a ${ultimo.label} · generado el ${meta.generadoEn}`,
+      extraHtml: heroTldrHtml,
+    }),
+    bodyHtml: [
+      `<section class="print-section">${resumenBody}</section>`,
+      `<section class="print-section"><h2>Acciones</h2>${accionesBody}</section>`,
+      `<section class="print-section"><h2>Gastos operativos</h2>${gastosBody}</section>`,
+      `<section class="print-section"><h2>Productos</h2>${productosBody}</section>`,
+      `<section class="print-section"><h2>Clientes y canales</h2>${clientesBody}</section>`,
+      `<section class="print-section"><h2>Devoluciones (notas de crédito)</h2>${devolucionesBody}</section>`,
+      `<section class="print-section"><h2>Notas y supuestos</h2>${notasBody}</section>`,
+    ].join("\n"),
+  });
+
+  return pages;
 }
 
 const CSS = `
 :root {
-  color-scheme: light dark;
-  --surface-0: #f6f5f1;
-  --surface-1: #fcfcfb;
-  --surface-2: #ffffff;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --border: rgba(11,11,11,0.10);
-  --border-strong: rgba(11,11,11,0.18);
-  --series-ingresos: #2a78d6;
-  --series-margen: #1baf7a;
-  --series-resultado: #6250d6;
-  --series-gastos: #eb6834;
-  --series-canal-1: #2a78d6;
-  --series-canal-2: #eb6834;
-  --series-canal-3: #1baf7a;
-  --series-canal-4: #eda100;
-  --status-critical: #d03b3b;
-  --status-critical-bg: #fcebeb;
-  --status-warning: #a86400;
-  --status-warning-bg: #faeeda;
-  --status-info: #0f6e56;
-  --status-info-bg: #e1f5ee;
-  --diverging-positive: #1baf7a;
-  --diverging-negative: #d03b3b;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface-0: #141413;
-    --surface-1: #1a1a19;
-    --surface-2: #202020;
-    --text-primary: #f0efec;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --border: rgba(255,255,255,0.12);
-    --border-strong: rgba(255,255,255,0.22);
-    --series-ingresos: #3987e5;
-    --series-margen: #199e70;
-    --series-resultado: #9085e9;
-    --series-gastos: #d95926;
-    --series-canal-1: #3987e5;
-    --series-canal-2: #d95926;
-    --series-canal-3: #199e70;
-    --series-canal-4: #c98500;
-    --status-critical: #f2a3a3;
-    --status-critical-bg: #3a1f1f;
-    --status-warning: #f0c987;
-    --status-warning-bg: #3a2f1a;
-    --status-info: #8fd8c2;
-    --status-info-bg: #1a332c;
-    --diverging-positive: #199e70;
-    --diverging-negative: #e66767;
-  }
+  color-scheme: light;
+  --surface-0: #ffffff;
+  --surface-1: #ffffff;
+  --surface-tint-a: #fff0f7;
+  --surface-tint-b: #fff7fa;
+  --ink: #2a0a1c;
+  --ink-dark: #1e0714;
+  --text-primary: #2a0a1c;
+  --text-secondary: #7a5566;
+  --text-muted: #a68a95;
+  --border: rgba(42,10,28,0.10);
+  --border-strong: rgba(42,10,28,0.22);
+  --pink: #ff3d80;
+  --orange: #ff7a45;
+  --gradient: linear-gradient(96deg, var(--pink) 0%, var(--orange) 100%);
+  --series-ingresos: #ff3d80;
+  --series-margen: #ff7a45;
+  --series-gastos: #2a0a1c;
+  --series-canal-1: #ff3d80;
+  --series-canal-2: #ff7a45;
+  --series-canal-3: #2a0a1c;
+  --series-canal-4: #c98aa0;
+  --status-critical: #c8102e;
+  --status-critical-bg: rgba(200,16,46,0.10);
+  --status-critical-ring: rgba(200,16,46,0.32);
+  --status-warning: #954416;
+  --status-warning-bg: rgba(255,122,69,0.12);
+  --status-warning-ring: rgba(255,122,69,0.34);
+  --status-info: #2f7a4f;
+  --status-info-bg: rgba(47,122,79,0.10);
+  --status-info-ring: rgba(47,122,79,0.30);
+  --diverging-positive: #2f7a4f;
+  --diverging-negative: #c8102e;
+  --card-shadow: 0 1px 2px rgba(42,10,28,0.04), 0 12px 28px -14px rgba(42,10,28,0.28);
+  --footer-height: 3.25rem;
 }
 * { box-sizing: border-box; }
 body {
@@ -366,63 +461,117 @@ body {
   font-size: 16px;
   line-height: 1.7;
 }
-h1, h2, h3 { font-weight: 500; margin: 0 0 0.5rem; }
-h1 { font-size: 26px; }
-h2 { font-size: 20px; padding-top: 0.25rem; }
-h3 { font-size: 16px; margin-top: 1.5rem; }
-code { background: var(--surface-1); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
-.page-header {
-  background: var(--surface-1);
+h1, h2, h3 { font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+h1 { font-size: 32px; }
+h2 { font-size: 21px; padding-top: 0.25rem; }
+h3 { font-size: 16px; margin-top: 1.5rem; letter-spacing: -0.01em; }
+code { background: var(--surface-tint-a); padding: 0.1rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+.topbar {
+  background: var(--surface-0);
   border-bottom: 0.5px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 10;
 }
-.page-header-inner {
+.topbar-inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 1.25rem 1.5rem 0.75rem;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
 }
-.eyebrow { font-size: 13px; color: var(--text-muted); margin: 0; text-transform: none; }
-.page-subtitle { color: var(--text-secondary); font-size: 14px; margin: 0.25rem 0 1rem; }
-.nav { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-bottom: 0.75rem; }
-.nav a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
-.nav a:hover { color: var(--text-primary); text-decoration: underline; }
-.page-main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
-.section { padding: 2rem 0; border-bottom: 0.5px solid var(--border); }
-.section:last-child { border-bottom: none; }
-.section-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: -0.25rem; }
+.brand { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-mark {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sep { color: var(--text-muted); }
+.brand-client { font-size: 14px; color: var(--text-secondary); }
+.topbar-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.topbar-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+.topbar-links a:hover { color: var(--ink); }
+.topbar-links a.active { color: var(--pink); font-weight: 600; }
+.page-head {
+  padding: 2rem 0 0.5rem;
+  background: linear-gradient(180deg, var(--surface-tint-a) 0%, var(--surface-tint-b) 60%, var(--surface-0) 100%);
+}
+.page-head-inner { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+.eyebrow { font-size: 13px; color: var(--pink); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+.page-head-subtitle { color: var(--text-secondary); font-size: 14px; margin: 0.35rem 0 0; }
+.hero-tldr { display: flex; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 0.85rem 1.25rem; margin-top: 1.25rem; }
+.hero-tldr-text { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.page-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.1rem; }
+.btn-ghost { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 16px; text-decoration: none; }
+.btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+.page-main { max-width: 960px; margin: 0 auto; padding: 0.5rem 1.5rem calc(var(--footer-height) + 2rem); }
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 1rem 0; }
-.kpi-card { background: var(--surface-1); border-radius: 8px; padding: 1rem; }
+.kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 1.1rem; }
 .kpi-label { font-size: 13px; color: var(--text-secondary); }
-.kpi-value { font-size: 24px; font-weight: 500; margin-top: 4px; }
+.kpi-value { font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }
 .kpi-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .chart-caption { font-size: 13px; color: var(--text-muted); margin-top: 0.5rem; }
 .chart-label { font-size: 12px; fill: var(--text-secondary); }
-.chart-value { font-size: 12px; fill: var(--text-primary); font-weight: 500; }
+.chart-value { font-size: 12px; fill: var(--ink); font-weight: 600; }
 .chart-axis-label { font-size: 11px; fill: var(--text-muted); }
 .chart-grid { stroke: var(--border); stroke-width: 1; }
 .chart-zero { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 3; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
 .chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .chart-legend-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-.table-wrap { overflow-x: auto; margin-top: 1rem; }
+.table-wrap { overflow-x: auto; margin-top: 1rem; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.data-table th, .data-table td { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
-.data-table th { color: var(--text-secondary); font-weight: 500; }
+.data-table th, .data-table td { text-align: left; padding: 10px 14px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+.data-table th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; }
+.data-table th:hover { color: var(--pink); }
+.data-table th[data-sort="asc"]::after { content: " ▲"; font-size: 10px; color: var(--pink); }
+.data-table th[data-sort="desc"]::after { content: " ▼"; font-size: 10px; color: var(--pink); }
+.data-table tr:last-child td { border-bottom: none; }
 .insight-list { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
-.insight-card { background: var(--surface-1); border-radius: 8px; border-left: 4px solid var(--border); padding: 1rem 1.25rem; }
+.insight-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); border-left: 4px solid var(--border); padding: 1.1rem 1.25rem; }
 .insight-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.insight-index { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+.insight-index { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 .insight-title { font-size: 16px; margin: 0; }
 .insight-detail { color: var(--text-secondary); margin: 0.5rem 0 0; }
-.insight-action { margin: 0.5rem 0 0; }
-.badge { font-size: 12px; padding: 2px 10px; border-radius: 999px; font-weight: 500; }
-.callout { border-radius: 8px; padding: 1rem 1.25rem; font-size: 14px; margin-top: 1rem; }
+.insight-action { margin: 0.6rem 0 0; color: var(--text-secondary); }
+.insight-action-label { color: var(--pink); font-weight: 700; margin-right: 4px; }
+.badge { font-size: 12px; padding: 3px 12px; border-radius: 999px; font-weight: 600; }
+.callout { border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--card-shadow); padding: 1.1rem 1.25rem; font-size: 14px; margin-top: 1rem; }
 .callout ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
-.callout-warning { background: var(--status-warning-bg); color: var(--text-primary); }
-.callout-ok { background: var(--status-info-bg); color: var(--text-primary); }
-.callout-info { background: var(--surface-1); color: var(--text-primary); }
-.build-meta { font-size: 12px; color: var(--text-muted); margin-top: 1rem; }
-.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding: 2rem 1.5rem; }
+.callout-warning { background: var(--status-warning-bg); color: var(--ink); }
+.callout-ok { background: var(--status-info-bg); color: var(--ink); }
+.callout-info { background: var(--surface-1); color: var(--ink); }
+.page-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-dark);
+  color: var(--surface-tint-a);
+  font-size: 12px;
+}
+.print-section { padding: 2rem 0; border-bottom: 0.5px solid var(--border); }
+.print-section:last-child { border-bottom: none; }
+@media print {
+  .topbar, .page-footer, .page-actions { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; }
+  .page-head { background: none; padding-top: 0; }
+  .page-main { padding-bottom: 1rem; }
+  .kpi-card, .insight-card, .callout, .table-wrap, .hero-tldr { box-shadow: none; break-inside: avoid; }
+  .print-section { break-after: page; }
+  .print-section:last-child { break-after: auto; }
+}
 `;

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tostadero Ruta 9 — Resumen</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #ffffff;
+  --surface-1: #ffffff;
+  --surface-tint-a: #fff0f7;
+  --surface-tint-b: #fff7fa;
+  --ink: #2a0a1c;
+  --ink-dark: #1e0714;
+  --text-primary: #2a0a1c;
+  --text-secondary: #7a5566;
+  --text-muted: #a68a95;
+  --border: rgba(42,10,28,0.10);
+  --border-strong: rgba(42,10,28,0.22);
+  --pink: #ff3d80;
+  --orange: #ff7a45;
+  --gradient: linear-gradient(96deg, var(--pink) 0%, var(--orange) 100%);
+  --series-ingresos: #ff3d80;
+  --series-margen: #ff7a45;
+  --series-gastos: #2a0a1c;
+  --series-canal-1: #ff3d80;
+  --series-canal-2: #ff7a45;
+  --series-canal-3: #2a0a1c;
+  --series-canal-4: #c98aa0;
+  --status-critical: #c8102e;
+  --status-critical-bg: rgba(200,16,46,0.10);
+  --status-critical-ring: rgba(200,16,46,0.32);
+  --status-warning: #954416;
+  --status-warning-bg: rgba(255,122,69,0.12);
+  --status-warning-ring: rgba(255,122,69,0.34);
+  --status-info: #2f7a4f;
+  --status-info-bg: rgba(47,122,79,0.10);
+  --status-info-ring: rgba(47,122,79,0.30);
+  --diverging-positive: #2f7a4f;
+  --diverging-negative: #c8102e;
+  --card-shadow: 0 1px 2px rgba(42,10,28,0.04), 0 12px 28px -14px rgba(42,10,28,0.28);
+  --footer-height: 3.25rem;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+h1, h2, h3 { font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+h1 { font-size: 32px; }
+h2 { font-size: 21px; padding-top: 0.25rem; }
+h3 { font-size: 16px; margin-top: 1.5rem; letter-spacing: -0.01em; }
+code { background: var(--surface-tint-a); padding: 0.1rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+.topbar {
+  background: var(--surface-0);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.brand { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-mark {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sep { color: var(--text-muted); }
+.brand-client { font-size: 14px; color: var(--text-secondary); }
+.topbar-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.topbar-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+.topbar-links a:hover { color: var(--ink); }
+.topbar-links a.active { color: var(--pink); font-weight: 600; }
+.page-head {
+  padding: 2rem 0 0.5rem;
+  background: linear-gradient(180deg, var(--surface-tint-a) 0%, var(--surface-tint-b) 60%, var(--surface-0) 100%);
+}
+.page-head-inner { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+.eyebrow { font-size: 13px; color: var(--pink); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+.page-head-subtitle { color: var(--text-secondary); font-size: 14px; margin: 0.35rem 0 0; }
+.hero-tldr { display: flex; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 0.85rem 1.25rem; margin-top: 1.25rem; }
+.hero-tldr-text { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.page-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.1rem; }
+.btn-ghost { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 16px; text-decoration: none; }
+.btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+.page-main { max-width: 960px; margin: 0 auto; padding: 0.5rem 1.5rem calc(var(--footer-height) + 2rem); }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 1rem 0; }
+.kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 1.1rem; }
+.kpi-label { font-size: 13px; color: var(--text-secondary); }
+.kpi-value { font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }
+.kpi-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.chart-caption { font-size: 13px; color: var(--text-muted); margin-top: 0.5rem; }
+.chart-label { font-size: 12px; fill: var(--text-secondary); }
+.chart-value { font-size: 12px; fill: var(--ink); font-weight: 600; }
+.chart-axis-label { font-size: 11px; fill: var(--text-muted); }
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-zero { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.table-wrap { overflow-x: auto; margin-top: 1rem; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th, .data-table td { text-align: left; padding: 10px 14px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+.data-table th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; }
+.data-table th:hover { color: var(--pink); }
+.data-table th[data-sort="asc"]::after { content: " ▲"; font-size: 10px; color: var(--pink); }
+.data-table th[data-sort="desc"]::after { content: " ▼"; font-size: 10px; color: var(--pink); }
+.data-table tr:last-child td { border-bottom: none; }
+.insight-list { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
+.insight-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); border-left: 4px solid var(--border); padding: 1.1rem 1.25rem; }
+.insight-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.insight-index { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.insight-title { font-size: 16px; margin: 0; }
+.insight-detail { color: var(--text-secondary); margin: 0.5rem 0 0; }
+.insight-action { margin: 0.6rem 0 0; color: var(--text-secondary); }
+.insight-action-label { color: var(--pink); font-weight: 700; margin-right: 4px; }
+.badge { font-size: 12px; padding: 3px 12px; border-radius: 999px; font-weight: 600; }
+.callout { border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--card-shadow); padding: 1.1rem 1.25rem; font-size: 14px; margin-top: 1rem; }
+.callout ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+.callout-warning { background: var(--status-warning-bg); color: var(--ink); }
+.callout-ok { background: var(--status-info-bg); color: var(--ink); }
+.callout-info { background: var(--surface-1); color: var(--ink); }
+.page-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-dark);
+  color: var(--surface-tint-a);
+  font-size: 12px;
+}
+.print-section { padding: 2rem 0; border-bottom: 0.5px solid var(--border); }
+.print-section:last-child { border-bottom: none; }
+@media print {
+  .topbar, .page-footer, .page-actions { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; }
+  .page-head { background: none; padding-top: 0; }
+  .page-main { padding-bottom: 1rem; }
+  .kpi-card, .insight-card, .callout, .table-wrap, .hero-tldr { box-shadow: none; break-inside: avoid; }
+  .print-section { break-after: page; }
+  .print-section:last-child { break-after: auto; }
+}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">Sawy</span><span class="brand-sep">·</span><span class="brand-client">Tostadero Ruta 9</span>
+    </a>
+    <div class="topbar-links"><a href="index.html" class="active" aria-current="page">Resumen</a><a href="acciones.html">Acciones</a><a href="gastos.html">Gastos</a><a href="productos.html">Productos</a><a href="clientes.html">Clientes y canales</a><a href="devoluciones.html">Devoluciones</a><a href="notas.html">Notas y supuestos</a></div>
+  </div>
+</nav>
+<header class="page-head">
+  <div class="page-head-inner">
+    <p class="eyebrow">Herramienta de visibilidad de negocio</p>
+    <h1>Tostadero Ruta 9</h1>
+    <p class="page-head-subtitle">Período analizado: ene 2025 a jun 2025 · generado el 29 de septiembre de 2026, 11:37 p. m.</p>
+    <div class="hero-tldr" style="border-left-color:var(--status-critical)">
+      <span class="badge" style="background:var(--status-critical-bg);color:var(--status-critical);box-shadow:inset 0 0 0 1px var(--status-critical-ring)">Urgente</span>
+      <p class="hero-tldr-text">El período ene 2025–jun 2025 cierra en rojo: -$ 1.073.113</p>
+    </div>
+    <div class="page-actions">
+  <a href="index.html?print=1" class="btn-ghost" data-print-target="index.html">⬇ Resumen (PDF)</a>
+  <a href="reporte-completo.html?print=1" class="btn-ghost" data-print-target="reporte-completo.html">⬇ Reporte completo (PDF)</a>
+</div>
+  </div>
+</header>
+<main class="page-main">
+<h2>Resumen del período</h2>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+    <div class="kpi-label">Facturación total</div>
+    <div class="kpi-value">$ 120.500.593</div>
+    <div class="kpi-sublabel">ene 2025 a jun 2025</div>
+  </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Margen bruto</div>
+    <div class="kpi-value">$ 33.438.378</div>
+    <div class="kpi-sublabel">27,7% sobre facturación</div>
+  </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Resultado neto acumulado</div>
+    <div class="kpi-value">-$ 1.073.113</div>
+    <div class="kpi-sublabel">-0,9% sobre facturación</div>
+  </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Resultado neto — jun 2025</div>
+    <div class="kpi-value">-$ 265.094</div>
+    <div class="kpi-sublabel">-1,2% de ese mes</div>
+  </div>
+  </div>
+  <h3>Ingresos y margen bruto por mes</h3>
+  <div class="chart-legend"><span class="chart-legend-item"><span class="chart-legend-swatch" style="background:var(--series-ingresos)"></span>Ingresos: <strong>$ 22.421.268</strong></span><span class="chart-legend-item"><span class="chart-legend-swatch" style="background:var(--series-margen)"></span>Margen bruto: <strong>$ 6.039.789</strong></span></div>
+  <svg viewBox="0 0 680 280" width="100%" height="280" role="img" aria-label="Evolución mensual de ingresos y margen bruto, de ene 2025 a jun 2025"><line x1="74" y1="16.0" x2="664" y2="16.0" class="chart-grid"></line>
+      <text x="66" y="20.0" text-anchor="end" class="chart-axis-label">$ 24.663.394</text><line x1="74" y1="75.0" x2="664" y2="75.0" class="chart-grid"></line>
+      <text x="66" y="79.0" text-anchor="end" class="chart-axis-label">$ 17.937.014</text><line x1="74" y1="134.0" x2="664" y2="134.0" class="chart-grid"></line>
+      <text x="66" y="138.0" text-anchor="end" class="chart-axis-label">$ 11.210.634</text><line x1="74" y1="193.0" x2="664" y2="193.0" class="chart-grid"></line>
+      <text x="66" y="197.0" text-anchor="end" class="chart-axis-label">$ 4.484.254</text><line x1="74" y1="252.0" x2="664" y2="252.0" class="chart-grid"></line>
+      <text x="66" y="256.0" text-anchor="end" class="chart-axis-label">-$ 2.242.127</text><line x1="74" y1="232.3" x2="664" y2="232.3" class="chart-zero"></line><path d="M74.0,47.6 L192.0,53.7 L310.0,71.5 L428.0,77.1 L546.0,51.5 L664.0,35.7" fill="none" stroke="var(--series-ingresos)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <circle cx="664.0" cy="35.7" r="4" fill="var(--series-ingresos)"></circle><path d="M74.0,184.2 L192.0,184.3 L310.0,187.1 L428.0,184.9 L546.0,180.8 L664.0,179.4" fill="none" stroke="var(--series-margen)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <circle cx="664.0" cy="179.4" r="4" fill="var(--series-margen)"></circle><text x="74.0" y="272" text-anchor="middle" class="chart-axis-label">ene 2025</text><text x="192.0" y="272" text-anchor="middle" class="chart-axis-label">feb 2025</text><text x="310.0" y="272" text-anchor="middle" class="chart-axis-label">mar 2025</text><text x="428.0" y="272" text-anchor="middle" class="chart-axis-label">abr 2025</text><text x="546.0" y="272" text-anchor="middle" class="chart-axis-label">may 2025</text><text x="664.0" y="272" text-anchor="middle" class="chart-axis-label">jun 2025</text></svg>
+  <h3>Margen bruto contra gastos operativos</h3>
+  <div class="chart-legend"><span class="chart-legend-item"><span class="chart-legend-swatch" style="background:var(--series-margen)"></span>Margen bruto: <strong>$ 6.039.789</strong></span><span class="chart-legend-item"><span class="chart-legend-swatch" style="background:var(--series-gastos)"></span>Gastos operativos: <strong>$ 6.304.883</strong></span></div>
+  <svg viewBox="0 0 680 280" width="100%" height="280" role="img" aria-label="Margen bruto contra gastos operativos por mes, de ene 2025 a jun 2025"><line x1="74" y1="16.0" x2="664" y2="16.0" class="chart-grid"></line>
+      <text x="66" y="20.0" text-anchor="end" class="chart-axis-label">$ 6.935.371</text><line x1="74" y1="75.0" x2="664" y2="75.0" class="chart-grid"></line>
+      <text x="66" y="79.0" text-anchor="end" class="chart-axis-label">$ 5.043.906</text><line x1="74" y1="134.0" x2="664" y2="134.0" class="chart-grid"></line>
+      <text x="66" y="138.0" text-anchor="end" class="chart-axis-label">$ 3.152.442</text><line x1="74" y1="193.0" x2="664" y2="193.0" class="chart-grid"></line>
+      <text x="66" y="197.0" text-anchor="end" class="chart-axis-label">$ 1.260.977</text><line x1="74" y1="252.0" x2="664" y2="252.0" class="chart-grid"></line>
+      <text x="66" y="256.0" text-anchor="end" class="chart-axis-label">-$ 630.488</text><line x1="74" y1="232.3" x2="664" y2="232.3" class="chart-zero"></line><path d="M74.0,61.2 L192.0,61.7 L310.0,71.3 L428.0,63.7 L546.0,49.2 L664.0,43.9" fill="none" stroke="var(--series-margen)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <circle cx="664.0" cy="43.9" r="4" fill="var(--series-margen)"></circle><path d="M74.0,51.7 L192.0,53.8 L310.0,61.6 L428.0,66.2 L546.0,48.5 L664.0,35.7" fill="none" stroke="var(--series-gastos)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4"></path>
+      <circle cx="664.0" cy="35.7" r="4" fill="var(--series-gastos)"></circle><text x="74.0" y="272" text-anchor="middle" class="chart-axis-label">ene 2025</text><text x="192.0" y="272" text-anchor="middle" class="chart-axis-label">feb 2025</text><text x="310.0" y="272" text-anchor="middle" class="chart-axis-label">mar 2025</text><text x="428.0" y="272" text-anchor="middle" class="chart-axis-label">abr 2025</text><text x="546.0" y="272" text-anchor="middle" class="chart-axis-label">may 2025</text><text x="664.0" y="272" text-anchor="middle" class="chart-axis-label">jun 2025</text></svg>
+  <p class="chart-caption">La distancia entre estas dos líneas es, mes a mes, el resultado neto: cuanto más se acercan (o se cruzan), menos —o nada— queda libre.</p>
+  <h3>Resultado neto por mes</h3>
+  <svg viewBox="0 0 680 220" width="100%" height="220" role="img" aria-label="Resultado neto por mes, de ene 2025 a jun 2025"><line x1="74" y1="20.0" x2="664" y2="20.0" class="chart-grid"></line>
+      <text x="66" y="24.0" text-anchor="end" class="chart-axis-label">$ 141.135</text><line x1="74" y1="63.0" x2="664" y2="63.0" class="chart-grid"></line>
+      <text x="66" y="67.0" text-anchor="end" class="chart-axis-label">$ 13.178</text><line x1="74" y1="106.0" x2="664" y2="106.0" class="chart-grid"></line>
+      <text x="66" y="110.0" text-anchor="end" class="chart-axis-label">-$ 114.780</text><line x1="74" y1="149.0" x2="664" y2="149.0" class="chart-grid"></line>
+      <text x="66" y="153.0" text-anchor="end" class="chart-axis-label">-$ 242.738</text><line x1="74" y1="192.0" x2="664" y2="192.0" class="chart-grid"></line>
+      <text x="66" y="196.0" text-anchor="end" class="chart-axis-label">-$ 370.696</text><line x1="74" y1="67.4" x2="664" y2="67.4" class="chart-zero"></line><rect x="103.2" y="67.4" width="40.0" height="102.1" rx="3" fill="var(--diverging-negative)"></rect>
+      <text x="123.2" y="183.5" text-anchor="middle" class="chart-value">-$ 303.866</text>
+      <text x="123.2" y="212" text-anchor="middle" class="chart-axis-label">ene 2025</text><rect x="201.5" y="67.4" width="40.0" height="84.8" rx="3" fill="var(--diverging-negative)"></rect>
+      <text x="221.5" y="166.2" text-anchor="middle" class="chart-value">-$ 252.267</text>
+      <text x="221.5" y="212" text-anchor="middle" class="chart-axis-label">feb 2025</text><rect x="299.8" y="67.4" width="40.0" height="104.7" rx="3" fill="var(--diverging-negative)"></rect>
+      <text x="319.8" y="186.2" text-anchor="middle" class="chart-value">-$ 311.639</text>
+      <text x="319.8" y="212" text-anchor="middle" class="chart-axis-label">mar 2025</text><rect x="398.2" y="39.8" width="40.0" height="27.6" rx="3" fill="var(--diverging-positive)"></rect>
+      <text x="418.2" y="33.8" text-anchor="middle" class="chart-value">$ 82.078</text>
+      <text x="418.2" y="212" text-anchor="middle" class="chart-axis-label">abr 2025</text><rect x="496.5" y="67.4" width="40.0" height="7.5" rx="3" fill="var(--diverging-negative)"></rect>
+      <text x="516.5" y="88.9" text-anchor="middle" class="chart-value">-$ 22.324</text>
+      <text x="516.5" y="212" text-anchor="middle" class="chart-axis-label">may 2025</text><rect x="594.8" y="67.4" width="40.0" height="89.1" rx="3" fill="var(--diverging-negative)"></rect>
+      <text x="614.8" y="170.5" text-anchor="middle" class="chart-value">-$ 265.094</text>
+      <text x="614.8" y="212" text-anchor="middle" class="chart-axis-label">jun 2025</text></svg>
+  <div class="table-wrap"><table class="data-table"><thead><tr><th>Mes</th><th>Ingresos</th><th>Costo mercadería</th><th>Margen bruto</th><th>Margen %</th><th>Gastos operativos</th><th>Resultado neto</th></tr></thead><tbody><tr><td data-value="24301">ene 2025</td><td data-value="21062229">$ 21.062.229</td><td data-value="15575430">$ 15.575.430</td><td data-value="5486799">$ 5.486.799</td><td data-value="0.26050419449907225">26,1%</td><td data-value="5790665">$ 5.790.665</td><td data-value="-303866">-$ 303.866</td></tr><tr><td data-value="24302">feb 2025</td><td data-value="20366404.75999997">$ 20.366.405</td><td data-value="14894918">$ 14.894.918</td><td data-value="5471486.759999972">$ 5.471.487</td><td data-value="0.26865255917657505">26,9%</td><td data-value="5723754">$ 5.723.754</td><td data-value="-252267.24000002816">-$ 252.267</td></tr><tr><td data-value="24303">mar 2025</td><td data-value="18330878.34999991">$ 18.330.878</td><td data-value="13169803">$ 13.169.803</td><td data-value="5161075.349999908">$ 5.161.075</td><td data-value="0.28155090287858103">28,2%</td><td data-value="5472714">$ 5.472.714</td><td data-value="-311638.65000009164">-$ 311.639</td></tr><tr><td data-value="24304">abr 2025</td><td data-value="17699941.989999983">$ 17.699.942</td><td data-value="12292992">$ 12.292.992</td><td data-value="5406949.989999983">$ 5.406.950</td><td data-value="0.30547840174023017">30,5%</td><td data-value="5324872">$ 5.324.872</td><td data-value="82077.98999998346">$ 82.078</td></tr><tr><td data-value="24305">may 2025</td><td data-value="20619871.89">$ 20.619.872</td><td data-value="14747593">$ 14.747.593</td><td data-value="5872278.890000001">$ 5.872.279</td><td data-value="0.28478736052903775">28,5%</td><td data-value="5894603">$ 5.894.603</td><td data-value="-22324.109999999404">-$ 22.324</td></tr><tr><td data-value="24306">jun 2025</td><td data-value="22421267.500000097">$ 22.421.268</td><td data-value="16381479">$ 16.381.479</td><td data-value="6039788.500000097">$ 6.039.789</td><td data-value="0.269377656727037">26,9%</td><td data-value="6304883">$ 6.304.883</td><td data-value="-265094.49999990314">-$ 265.094</td></tr></tbody></table></div>
+</main>
+<footer class="page-footer">Sawy · reporte para Tostadero Ruta 9</footer>
+<script>(function () {
+  var params = new URLSearchParams(location.search);
+  if (params.get("print") === "1") {
+    window.addEventListener("load", function () { window.print(); });
+  }
+
+  var currentFile = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll("[data-print-target]").forEach(function (btn) {
+    if (btn.getAttribute("data-print-target") === currentFile) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.print();
+      });
+    }
+  });
+
+  document.querySelectorAll(".data-table").forEach(function (tbl) {
+    var headers = tbl.querySelectorAll("th");
+    headers.forEach(function (th, colIndex) {
+      th.addEventListener("click", function () {
+        var tbody = tbl.querySelector("tbody");
+        var rows = Array.from(tbody.querySelectorAll("tr"));
+        var asc = th.getAttribute("data-sort") !== "asc";
+        headers.forEach(function (h) { h.removeAttribute("data-sort"); });
+        th.setAttribute("data-sort", asc ? "asc" : "desc");
+        rows.sort(function (a, b) {
+          var av = a.children[colIndex].getAttribute("data-value");
+          var bv = b.children[colIndex].getAttribute("data-value");
+          var an = parseFloat(av);
+          var bn = parseFloat(bv);
+          var cmp = !isNaN(an) && !isNaN(bn) ? an - bn : String(av).localeCompare(String(bv), "es");
+          return asc ? cmp : -cmp;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+      });
+    });
+  });
+})();</script>
+</body>
+</html>

@@ -1,15 +1,3 @@
-// Reglas de negocio y de limpieza de datos, separadas de la ingesta pura.
-// Documentadas aca porque son SUPUESTOS, no hechos: si el dataset cambia,
-// esto es lo primero a revisar (ver tambien respuestas.md).
-
-// Sofia avisa en LEEME.txt: "quedaron codigos de producto viejos dando
-// vueltas en algunas facturas". Se detecto un solo caso en el export:
-// "BLEND1K" (28 filas, todas de GRANOS DEL SUR / C0001) que no existe en
-// productos.csv como activo. Por descripcion ("BLEND CASA 1KG", unidad KG)
-// y por aparecer solo en el cliente mas antiguo, se asume que es el mismo
-// producto que "CAF-BLEND-1K" con el codigo del sistema anterior.
-// Si aparece un codigo nuevo no mapeado, se lo deja tal cual y se reporta
-// como advertencia de calidad de datos (no se descarta la venta).
 export const MAPEO_CODIGOS_LEGADOS = {
   BLEND1K: "CAF-BLEND-1K",
 };
@@ -27,16 +15,6 @@ function buildLookups({ productos, clientes, costos }) {
   return { productoPorCodigo, clientePorCodigo, costoPorClave };
 }
 
-/**
- * Cruza ventas con productos/clientes/costos y calcula margen por linea.
- * No lanza excepcion ante datos faltantes: cada problema queda como
- * advertencia en `warnings`, y la linea sigue procesandose con los datos
- * que tenga (costo 0 si no hay match, canal "Desconocido" si no hay cliente,
- * etc). Un ERP real siempre tiene algun cruce imperfecto; una herramienta
- * de negocio no puede caerse por eso, tiene que decirlo y seguir.
- *
- * @returns {{ ventas: object[], warnings: string[] }}
- */
 export function enriquecerVentas({ ventas, productos, clientes, costos }) {
   const { productoPorCodigo, clientePorCodigo, costoPorClave } = buildLookups({
     productos,

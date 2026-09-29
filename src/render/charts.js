@@ -1,18 +1,5 @@
 import { escapeHtml } from "../lib/html.js";
 
-// Generador de graficos en SVG puro, sin dependencias ni JS del lado del
-// cliente: todo el calculo de escalas pasa una sola vez, en Node, al armar
-// el reporte. El SVG queda inline en el HTML (no en un <img>), por eso puede
-// usar var(--...) en sus atributos de color/relleno y heredar el tema
-// claro/oscuro de la pagina que lo contiene.
-
-/**
- * Grafico de lineas para series temporales cortas (una sola escala Y,
- * que puede cruzar el cero — por eso siempre se fuerza el 0 dentro del
- * dominio y se dibuja una linea de base cuando corresponde).
- *
- * @param {{ labels: string[], series: {name:string, color:string, values:number[], dashed?:boolean}[], width?:number, height?:number, formatValue?: (n:number)=>string, ariaLabel: string }} opts
- */
 export function lineChart({ labels, series, width = 680, height = 280, formatValue = String, ariaLabel }) {
   const marginLeft = 74;
   const marginRight = 16;
@@ -53,22 +40,15 @@ export function lineChart({ labels, series, width = 680, height = 280, formatVal
     .map((s) => {
       const points = s.values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
       const lastIdx = s.values.length - 1;
-      return `<path d="${points}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${s.dashed ? ' stroke-dasharray="6 4"' : ""}></path>
-      <circle cx="${x(lastIdx).toFixed(1)}" cy="${y(s.values[lastIdx]).toFixed(1)}" r="4" fill="${s.color}"></circle>`;
+      const color = escapeHtml(s.color);
+      return `<path d="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${s.dashed ? ' stroke-dasharray="6 4"' : ""}></path>
+      <circle cx="${x(lastIdx).toFixed(1)}" cy="${y(s.values[lastIdx]).toFixed(1)}" r="4" fill="${color}"></circle>`;
     })
     .join("");
 
   return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="${escapeHtml(ariaLabel)}">${ticks}${zeroLine}${lines}${xLabels}</svg>`;
 }
 
-/**
- * Grafico de barras verticales para una serie temporal que cruza el cero
- * (ej. resultado neto mensual). El color de cada barra sigue su signo, no
- * su categoria — es la paleta "diverging" para valores arriba/abajo de una
- * base, distinta de la paleta categorica que usan los otros graficos.
- *
- * @param {{ labels: string[], values: number[], width?:number, height?:number, formatValue?: (n:number)=>string, ariaLabel: string }} opts
- */
 export function divergingBarChart({ labels, values, width = 680, height = 220, formatValue = String, ariaLabel }) {
   const marginLeft = 74;
   const marginRight = 16;
@@ -115,12 +95,6 @@ export function divergingBarChart({ labels, values, width = 680, height = 220, f
   return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="${escapeHtml(ariaLabel)}">${ticks}${zeroLine}${bars}</svg>`;
 }
 
-/**
- * Grafico de barras horizontales, para rankings con etiquetas largas
- * (nombres de producto/cliente) donde una barra vertical no entra.
- *
- * @param {{ items: {label:string, value:number, color?:string}[], width?:number, rowHeight?:number, barColor?:string, formatValue?: (n:number)=>string, ariaLabel: string }} opts
- */
 export function barChart({ items, width = 680, rowHeight = 34, barColor = "var(--series-ingresos)", formatValue = String, ariaLabel }) {
   const marginLeft = 240;
   const marginRight = 96;
@@ -142,7 +116,7 @@ export function barChart({ items, width = 680, rowHeight = 34, barColor = "var(-
     .map((item, i) => {
       const cy = top + i * rowHeight + rowHeight / 2;
       const barW = Math.max(1, (Math.abs(item.value) / maxVal) * plotW);
-      const color = item.color || barColor;
+      const color = escapeHtml(item.color || barColor);
       return `<text x="${marginLeft - 10}" y="${(cy + 4).toFixed(1)}" text-anchor="end" class="chart-label">${escapeHtml(item.label)}</text>
       <rect x="${marginLeft}" y="${(cy - barH / 2).toFixed(1)}" width="${barW.toFixed(1)}" height="${barH}" rx="4" fill="${color}"></rect>
       <text x="${(marginLeft + barW + 8).toFixed(1)}" y="${(cy + 4).toFixed(1)}" class="chart-value">${escapeHtml(formatValue(item.value))}</text>`;
@@ -152,12 +126,11 @@ export function barChart({ items, width = 680, rowHeight = 34, barColor = "var(-
   return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="${escapeHtml(ariaLabel)}">${gridLines}${rows}</svg>`;
 }
 
-/** Leyenda en HTML (no SVG) con cuadrado de color + nombre + ultimo valor. */
 export function legendHtml(series, formatValue = String) {
   return `<div class="chart-legend">${series
     .map(
       (s) =>
-        `<span class="chart-legend-item"><span class="chart-legend-swatch" style="background:${s.color}"></span>${escapeHtml(s.name)}: <strong>${escapeHtml(formatValue(s.values[s.values.length - 1]))}</strong></span>`
+        `<span class="chart-legend-item"><span class="chart-legend-swatch" style="background:${escapeHtml(s.color)}"></span>${escapeHtml(s.name)}: <strong>${escapeHtml(formatValue(s.values[s.values.length - 1]))}</strong></span>`
     )
     .join("")}</div>`;
 }

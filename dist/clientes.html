@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tostadero Ruta 9 — Clientes y canales</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #ffffff;
+  --surface-1: #ffffff;
+  --surface-tint-a: #fff0f7;
+  --surface-tint-b: #fff7fa;
+  --ink: #2a0a1c;
+  --ink-dark: #1e0714;
+  --text-primary: #2a0a1c;
+  --text-secondary: #7a5566;
+  --text-muted: #a68a95;
+  --border: rgba(42,10,28,0.10);
+  --border-strong: rgba(42,10,28,0.22);
+  --pink: #ff3d80;
+  --orange: #ff7a45;
+  --gradient: linear-gradient(96deg, var(--pink) 0%, var(--orange) 100%);
+  --series-ingresos: #ff3d80;
+  --series-margen: #ff7a45;
+  --series-gastos: #2a0a1c;
+  --series-canal-1: #ff3d80;
+  --series-canal-2: #ff7a45;
+  --series-canal-3: #2a0a1c;
+  --series-canal-4: #c98aa0;
+  --status-critical: #c8102e;
+  --status-critical-bg: rgba(200,16,46,0.10);
+  --status-critical-ring: rgba(200,16,46,0.32);
+  --status-warning: #954416;
+  --status-warning-bg: rgba(255,122,69,0.12);
+  --status-warning-ring: rgba(255,122,69,0.34);
+  --status-info: #2f7a4f;
+  --status-info-bg: rgba(47,122,79,0.10);
+  --status-info-ring: rgba(47,122,79,0.30);
+  --diverging-positive: #2f7a4f;
+  --diverging-negative: #c8102e;
+  --card-shadow: 0 1px 2px rgba(42,10,28,0.04), 0 12px 28px -14px rgba(42,10,28,0.28);
+  --footer-height: 3.25rem;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+h1, h2, h3 { font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+h1 { font-size: 32px; }
+h2 { font-size: 21px; padding-top: 0.25rem; }
+h3 { font-size: 16px; margin-top: 1.5rem; letter-spacing: -0.01em; }
+code { background: var(--surface-tint-a); padding: 0.1rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+.topbar {
+  background: var(--surface-0);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.brand { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-mark {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sep { color: var(--text-muted); }
+.brand-client { font-size: 14px; color: var(--text-secondary); }
+.topbar-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.topbar-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+.topbar-links a:hover { color: var(--ink); }
+.topbar-links a.active { color: var(--pink); font-weight: 600; }
+.page-head {
+  padding: 2rem 0 0.5rem;
+  background: linear-gradient(180deg, var(--surface-tint-a) 0%, var(--surface-tint-b) 60%, var(--surface-0) 100%);
+}
+.page-head-inner { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+.eyebrow { font-size: 13px; color: var(--pink); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+.page-head-subtitle { color: var(--text-secondary); font-size: 14px; margin: 0.35rem 0 0; }
+.hero-tldr { display: flex; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 0.85rem 1.25rem; margin-top: 1.25rem; }
+.hero-tldr-text { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.page-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.1rem; }
+.btn-ghost { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 16px; text-decoration: none; }
+.btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+.page-main { max-width: 960px; margin: 0 auto; padding: 0.5rem 1.5rem calc(var(--footer-height) + 2rem); }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 1rem 0; }
+.kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 1.1rem; }
+.kpi-label { font-size: 13px; color: var(--text-secondary); }
+.kpi-value { font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }
+.kpi-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.chart-caption { font-size: 13px; color: var(--text-muted); margin-top: 0.5rem; }
+.chart-label { font-size: 12px; fill: var(--text-secondary); }
+.chart-value { font-size: 12px; fill: var(--ink); font-weight: 600; }
+.chart-axis-label { font-size: 11px; fill: var(--text-muted); }
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-zero { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.table-wrap { overflow-x: auto; margin-top: 1rem; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th, .data-table td { text-align: left; padding: 10px 14px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+.data-table th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; }
+.data-table th:hover { color: var(--pink); }
+.data-table th[data-sort="asc"]::after { content: " ▲"; font-size: 10px; color: var(--pink); }
+.data-table th[data-sort="desc"]::after { content: " ▼"; font-size: 10px; color: var(--pink); }
+.data-table tr:last-child td { border-bottom: none; }
+.insight-list { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
+.insight-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); border-left: 4px solid var(--border); padding: 1.1rem 1.25rem; }
+.insight-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.insight-index { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.insight-title { font-size: 16px; margin: 0; }
+.insight-detail { color: var(--text-secondary); margin: 0.5rem 0 0; }
+.insight-action { margin: 0.6rem 0 0; color: var(--text-secondary); }
+.insight-action-label { color: var(--pink); font-weight: 700; margin-right: 4px; }
+.badge { font-size: 12px; padding: 3px 12px; border-radius: 999px; font-weight: 600; }
+.callout { border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--card-shadow); padding: 1.1rem 1.25rem; font-size: 14px; margin-top: 1rem; }
+.callout ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+.callout-warning { background: var(--status-warning-bg); color: var(--ink); }
+.callout-ok { background: var(--status-info-bg); color: var(--ink); }
+.callout-info { background: var(--surface-1); color: var(--ink); }
+.page-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-dark);
+  color: var(--surface-tint-a);
+  font-size: 12px;
+}
+.print-section { padding: 2rem 0; border-bottom: 0.5px solid var(--border); }
+.print-section:last-child { border-bottom: none; }
+@media print {
+  .topbar, .page-footer, .page-actions { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; }
+  .page-head { background: none; padding-top: 0; }
+  .page-main { padding-bottom: 1rem; }
+  .kpi-card, .insight-card, .callout, .table-wrap, .hero-tldr { box-shadow: none; break-inside: avoid; }
+  .print-section { break-after: page; }
+  .print-section:last-child { break-after: auto; }
+}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">Sawy</span><span class="brand-sep">·</span><span class="brand-client">Tostadero Ruta 9</span>
+    </a>
+    <div class="topbar-links"><a href="index.html">Resumen</a><a href="acciones.html">Acciones</a><a href="gastos.html">Gastos</a><a href="productos.html">Productos</a><a href="clientes.html" class="active" aria-current="page">Clientes y canales</a><a href="devoluciones.html">Devoluciones</a><a href="notas.html">Notas y supuestos</a></div>
+  </div>
+</nav>
+<header class="page-head">
+  <div class="page-head-inner">
+    
+    <h1>Clientes y canales</h1>
+    
+    
+    <div class="page-actions">
+  <a href="index.html?print=1" class="btn-ghost" data-print-target="index.html">⬇ Resumen (PDF)</a>
+  <a href="reporte-completo.html?print=1" class="btn-ghost" data-print-target="reporte-completo.html">⬇ Reporte completo (PDF)</a>
+</div>
+  </div>
+</header>
+<main class="page-main">
+<h3>Facturación por canal</h3>
+  <svg viewBox="0 0 680 152" width="100%" height="152" role="img" aria-label="Facturación por canal comercial"><line x1="240.0" y1="8" x2="240.0" y2="144" class="chart-grid"></line><line x1="326.0" y1="8" x2="326.0" y2="144" class="chart-grid"></line><line x1="412.0" y1="8" x2="412.0" y2="144" class="chart-grid"></line><line x1="498.0" y1="8" x2="498.0" y2="144" class="chart-grid"></line><line x1="584.0" y1="8" x2="584.0" y2="144" class="chart-grid"></line><text x="230" y="29.0" text-anchor="end" class="chart-label">Distribuidor</text>
+      <rect x="240" y="14.0" width="344.0" height="22" rx="4" fill="var(--series-canal-1)"></rect>
+      <text x="592.0" y="29.0" class="chart-value">$ 42.646.183</text><text x="230" y="63.0" text-anchor="end" class="chart-label">Mayorista</text>
+      <rect x="240" y="48.0" width="275.0" height="22" rx="4" fill="var(--series-canal-2)"></rect>
+      <text x="523.0" y="63.0" class="chart-value">$ 34.092.419</text><text x="230" y="97.0" text-anchor="end" class="chart-label">Ecommerce</text>
+      <rect x="240" y="82.0" width="263.4" height="22" rx="4" fill="var(--series-canal-3)"></rect>
+      <text x="511.4" y="97.0" class="chart-value">$ 32.659.851</text><text x="230" y="131.0" text-anchor="end" class="chart-label">Local</text>
+      <rect x="240" y="116.0" width="89.6" height="22" rx="4" fill="var(--series-canal-4)"></rect>
+      <text x="337.6" y="131.0" class="chart-value">$ 11.102.141</text></svg>
+  <h3>Top 8 clientes por facturación</h3>
+  <svg viewBox="0 0 680 288" width="100%" height="288" role="img" aria-label="Facturación por cliente, top 8"><line x1="240.0" y1="8" x2="240.0" y2="280" class="chart-grid"></line><line x1="326.0" y1="8" x2="326.0" y2="280" class="chart-grid"></line><line x1="412.0" y1="8" x2="412.0" y2="280" class="chart-grid"></line><line x1="498.0" y1="8" x2="498.0" y2="280" class="chart-grid"></line><line x1="584.0" y1="8" x2="584.0" y2="280" class="chart-grid"></line><text x="230" y="29.0" text-anchor="end" class="chart-label">GRANOS DEL SUR S.A.</text>
+      <rect x="240" y="14.0" width="344.0" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="592.0" y="29.0" class="chart-value">$ 42.646.183</text><text x="230" y="63.0" text-anchor="end" class="chart-label">VENTA ONLINE</text>
+      <rect x="240" y="48.0" width="263.4" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="511.4" y="63.0" class="chart-value">$ 32.659.851</text><text x="230" y="97.0" text-anchor="end" class="chart-label">CONSUMIDOR FINAL</text>
+      <rect x="240" y="82.0" width="89.6" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="337.6" y="97.0" class="chart-value">$ 11.102.141</text><text x="230" y="131.0" text-anchor="end" class="chart-label">Tostado Chacarita</text>
+      <rect x="240" y="116.0" width="10.2" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="258.2" y="131.0" class="chart-value">$ 1.261.130</text><text x="230" y="165.0" text-anchor="end" class="chart-label">Tostado Villa Crespo</text>
+      <rect x="240" y="150.0" width="9.6" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="257.6" y="165.0" class="chart-value">$ 1.194.513</text><text x="230" y="199.0" text-anchor="end" class="chart-label">El Almacen de Constitucion</text>
+      <rect x="240" y="184.0" width="9.5" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="257.5" y="199.0" class="chart-value">$ 1.183.240</text><text x="230" y="233.0" text-anchor="end" class="chart-label">El Almacen de Nunez</text>
+      <rect x="240" y="218.0" width="9.3" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="257.3" y="233.0" class="chart-value">$ 1.156.544</text><text x="230" y="267.0" text-anchor="end" class="chart-label">Coffee Lab Colegiales</text>
+      <rect x="240" y="252.0" width="9.1" height="22" rx="4" fill="var(--series-ingresos)"></rect>
+      <text x="257.1" y="267.0" class="chart-value">$ 1.125.315</text></svg>
+  <div class="table-wrap"><table class="data-table"><thead><tr><th>Cliente</th><th>Canal</th><th>Facturación</th><th>% del total</th><th>Margen bruto</th><th>Margen %</th><th>Bonif. prom.</th></tr></thead><tbody><tr><td data-value="GRANOS DEL SUR S.A.">GRANOS DEL SUR S.A.</td><td data-value="Distribuidor">Distribuidor</td><td data-value="42646182.95">$ 42.646.183</td><td data-value="0.35390848887013243">35,4%</td><td data-value="3225854.9499999997">$ 3.225.855</td><td data-value="0.0756422902791116">7,6%</td><td data-value="40">40,0%</td></tr><tr><td data-value="VENTA ONLINE">VENTA ONLINE</td><td data-value="Ecommerce">Ecommerce</td><td data-value="32659850.640000056">$ 32.659.851</td><td data-value="0.27103476998816955">27,1%</td><td data-value="17921453.63999995">$ 17.921.454</td><td data-value="0.5487304224854813">54,9%</td><td data-value="0">0,0%</td></tr><tr><td data-value="CONSUMIDOR FINAL">CONSUMIDOR FINAL</td><td data-value="Local">Local</td><td data-value="11102141.300000003">$ 11.102.141</td><td data-value="0.092133498918587">9,2%</td><td data-value="5701864.300000004">$ 5.701.864</td><td data-value="0.513582393335239">51,4%</td><td data-value="0">0,0%</td></tr><tr><td data-value="Tostado Chacarita">Tostado Chacarita</td><td data-value="Mayorista">Mayorista</td><td data-value="1261129.76">$ 1.261.130</td><td data-value="0.010465755590694731">1,0%</td><td data-value="255321.76">$ 255.322</td><td data-value="0.20245478942626807">20,2%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Tostado Villa Crespo">Tostado Villa Crespo</td><td data-value="Mayorista">Mayorista</td><td data-value="1194513.4">$ 1.194.513</td><td data-value="0.009912925450438795">1,0%</td><td data-value="220354.4">$ 220.354</td><td data-value="0.18447210387091514">18,4%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="El Almacen de Constitucion">El Almacen de Constitucion</td><td data-value="Mayorista">Mayorista</td><td data-value="1183240.0899999999">$ 1.183.240</td><td data-value="0.009819371471379467">1,0%</td><td data-value="263834.09">$ 263.834</td><td data-value="0.22297595579270818">22,3%</td><td data-value="30.000000000000007">30,0%</td></tr><tr><td data-value="El Almacen de Nunez">El Almacen de Nunez</td><td data-value="Mayorista">Mayorista</td><td data-value="1156544.21">$ 1.156.544</td><td data-value="0.009597829989907715">1,0%</td><td data-value="266865.21">$ 266.865</td><td data-value="0.23074363063042788">23,1%</td><td data-value="30">30,0%</td></tr><tr><td data-value="Coffee Lab Colegiales">Coffee Lab Colegiales</td><td data-value="Mayorista">Mayorista</td><td data-value="1125314.5100000002">$ 1.125.315</td><td data-value="0.009338663631506407">0,9%</td><td data-value="220711.51000000007">$ 220.712</td><td data-value="0.19613317702621644">19,6%</td><td data-value="32">32,0%</td></tr><tr><td data-value="El Almacen de Palermo II">El Almacen de Palermo II</td><td data-value="Mayorista">Mayorista</td><td data-value="1093361.0799999998">$ 1.093.361</td><td data-value="0.009073491244594868">0,9%</td><td data-value="185113.08000000002">$ 185.113</td><td data-value="0.16930644723516228">16,9%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="Tostado Coghlan II">Tostado Coghlan II</td><td data-value="Mayorista">Mayorista</td><td data-value="1065186.83">$ 1.065.187</td><td data-value="0.008839681192843231">0,9%</td><td data-value="176832.83000000005">$ 176.833</td><td data-value="0.16601109309622242">16,6%</td><td data-value="35">35,0%</td></tr><tr><td data-value="El Almacen de Barracas II">El Almacen de Barracas II</td><td data-value="Mayorista">Mayorista</td><td data-value="1064368.0299999998">$ 1.064.368</td><td data-value="0.008832886205563203">0,9%</td><td data-value="194031.03">$ 194.031</td><td data-value="0.1822969353936721">18,2%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="Panaderia Devoto">Panaderia Devoto</td><td data-value="Mayorista">Mayorista</td><td data-value="1054060.7399999998">$ 1.054.061</td><td data-value="0.008747348950505157">0,9%</td><td data-value="168356.74">$ 168.357</td><td data-value="0.15972204789640493">16,0%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="Bar San Telmo II">Bar San Telmo II</td><td data-value="Mayorista">Mayorista</td><td data-value="1052014.53">$ 1.052.015</td><td data-value="0.008730368038289405">0,9%</td><td data-value="217078.52999999997">$ 217.079</td><td data-value="0.20634556254655528">20,6%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Coffee Lab Belgrano II">Coffee Lab Belgrano II</td><td data-value="Mayorista">Mayorista</td><td data-value="1017630.94">$ 1.017.631</td><td data-value="0.008445028447801385">0,8%</td><td data-value="166107.94">$ 166.108</td><td data-value="0.16323004094195487">16,3%</td><td data-value="35">35,0%</td></tr><tr><td data-value="La Ventanita de Recoleta">La Ventanita de Recoleta</td><td data-value="Mayorista">Mayorista</td><td data-value="1002580.1">$ 1.002.580</td><td data-value="0.008320125826460778">0,8%</td><td data-value="158694.09999999998">$ 158.694</td><td data-value="0.15828570704724737">15,8%</td><td data-value="35">35,0%</td></tr><tr><td data-value="Panaderia Parque Chas">Panaderia Parque Chas</td><td data-value="Mayorista">Mayorista</td><td data-value="994538.26">$ 994.538</td><td data-value="0.008253388893744613">0,8%</td><td data-value="200175.25999999998">$ 200.175</td><td data-value="0.2012745693664917">20,1%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Bar Recoleta II">Bar Recoleta II</td><td data-value="Mayorista">Mayorista</td><td data-value="972388.87">$ 972.389</td><td data-value="0.008069577433912773">0,8%</td><td data-value="223466.87">$ 223.467</td><td data-value="0.22981224579421605">23,0%</td><td data-value="29.999999999999993">30,0%</td></tr><tr><td data-value="Coffee Lab Flores">Coffee Lab Flores</td><td data-value="Mayorista">Mayorista</td><td data-value="961426.2100000001">$ 961.426</td><td data-value="0.007978601450454984">0,8%</td><td data-value="159979.21000000002">$ 159.979</td><td data-value="0.16639780394586914">16,6%</td><td data-value="35">35,0%</td></tr><tr><td data-value="La Ventanita de Almagro II">La Ventanita de Almagro II</td><td data-value="Mayorista">Mayorista</td><td data-value="953538.62">$ 953.539</td><td data-value="0.007913144594421702">0,8%</td><td data-value="161237.62000000002">$ 161.238</td><td data-value="0.16909395866944543">16,9%</td><td data-value="34.99999999999999">35,0%</td></tr><tr><td data-value="Panaderia Villa Urquiza II">Panaderia Villa Urquiza II</td><td data-value="Mayorista">Mayorista</td><td data-value="940909.0400000002">$ 940.909</td><td data-value="0.007808335318100187">0,8%</td><td data-value="217708.03999999998">$ 217.708</td><td data-value="0.2313805381230049">23,1%</td><td data-value="29.999999999999996">30,0%</td></tr><tr><td data-value="Cafe Devoto II">Cafe Devoto II</td><td data-value="Mayorista">Mayorista</td><td data-value="925579.24">$ 925.579</td><td data-value="0.007681117687414639">0,8%</td><td data-value="169783.24000000002">$ 169.783</td><td data-value="0.1834345809225367">18,3%</td><td data-value="35">35,0%</td></tr><tr><td data-value="Usina Coghlan">Usina Coghlan</td><td data-value="Mayorista">Mayorista</td><td data-value="924777.3">$ 924.777</td><td data-value="0.007674462616457944">0,8%</td><td data-value="213054.3">$ 213.054</td><td data-value="0.23038443958345428">23,0%</td><td data-value="30">30,0%</td></tr><tr><td data-value="Cafe Palermo">Cafe Palermo</td><td data-value="Mayorista">Mayorista</td><td data-value="912833.4500000001">$ 912.833</td><td data-value="0.007575344017502735">0,8%</td><td data-value="184075.45000000004">$ 184.075</td><td data-value="0.20165283163100567">20,2%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Usina Flores II">Usina Flores II</td><td data-value="Mayorista">Mayorista</td><td data-value="897517.01">$ 897.517</td><td data-value="0.007448237257640418">0,7%</td><td data-value="205996.01000000004">$ 205.996</td><td data-value="0.2295176667459484">23,0%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Tostado Villa Urquiza">Tostado Villa Urquiza</td><td data-value="Mayorista">Mayorista</td><td data-value="874627.5100000002">$ 874.628</td><td data-value="0.007258283836357897">0,7%</td><td data-value="139995.51">$ 139.996</td><td data-value="0.16006300785119368">16,0%</td><td data-value="35">35,0%</td></tr><tr><td data-value="Coffee Lab Agronomia II">Coffee Lab Agronomia II</td><td data-value="Mayorista">Mayorista</td><td data-value="838888.6399999999">$ 838.889</td><td data-value="0.006961697164334857">0,7%</td><td data-value="184493.64">$ 184.494</td><td data-value="0.21992625862712842">22,0%</td><td data-value="30.00000000000001">30,0%</td></tr><tr><td data-value="Panaderia Chacarita II">Panaderia Chacarita II</td><td data-value="Mayorista">Mayorista</td><td data-value="797248.8099999999">$ 797.249</td><td data-value="0.006616140111095483">0,7%</td><td data-value="127027.81000000003">$ 127.028</td><td data-value="0.1593327056831857">15,9%</td><td data-value="35">35,0%</td></tr><tr><td data-value="La Ventanita de Nunez II">La Ventanita de Nunez II</td><td data-value="Mayorista">Mayorista</td><td data-value="783672.34">$ 783.672</td><td data-value="0.006503472865177507">0,7%</td><td data-value="124842.34000000003">$ 124.842</td><td data-value="0.15930425718483318">15,9%</td><td data-value="34.99999999999999">35,0%</td></tr><tr><td data-value="La Ventanita de San Telmo">La Ventanita de San Telmo</td><td data-value="Mayorista">Mayorista</td><td data-value="738889.26">$ 738.889</td><td data-value="0.0061318308781717215">0,6%</td><td data-value="145716.25999999998">$ 145.716</td><td data-value="0.19720987689007685">19,7%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Usina Colegiales II">Usina Colegiales II</td><td data-value="Mayorista">Mayorista</td><td data-value="729433.89">$ 729.434</td><td data-value="0.006053363463811769">0,6%</td><td data-value="154961.89">$ 154.962</td><td data-value="0.21244130842344056">21,2%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Cafe Barracas">Cafe Barracas</td><td data-value="Mayorista">Mayorista</td><td data-value="726752.3099999999">$ 726.752</td><td data-value="0.006031109797482544">0,6%</td><td data-value="116128.31">$ 116.128</td><td data-value="0.1597907683293088">16,0%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="Bar Saavedra">Bar Saavedra</td><td data-value="Mayorista">Mayorista</td><td data-value="722288.55">$ 722.289</td><td data-value="0.0059940663284778015">0,6%</td><td data-value="148805.55000000002">$ 148.806</td><td data-value="0.20601953332916603">20,6%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Cafe Parque Chas II">Cafe Parque Chas II</td><td data-value="Mayorista">Mayorista</td><td data-value="720431.6799999999">$ 720.432</td><td data-value="0.005978656694830194">0,6%</td><td data-value="141033.68000000002">$ 141.034</td><td data-value="0.1957627404724901">19,6%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Coffee Lab Saavedra II">Coffee Lab Saavedra II</td><td data-value="Mayorista">Mayorista</td><td data-value="707183.9500000001">$ 707.184</td><td data-value="0.0058687175682556915">0,6%</td><td data-value="134921.95">$ 134.922</td><td data-value="0.19078763029053472">19,1%</td><td data-value="35">35,0%</td></tr><tr><td data-value="Cafe Caballito">Cafe Caballito</td><td data-value="Mayorista">Mayorista</td><td data-value="661190.72">$ 661.191</td><td data-value="0.005487032892123229">0,5%</td><td data-value="130619.71999999999">$ 130.620</td><td data-value="0.19755225844670052">19,8%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Bar Agronomia">Bar Agronomia</td><td data-value="Mayorista">Mayorista</td><td data-value="631697.7699999999">$ 631.698</td><td data-value="0.005242279325806167">0,5%</td><td data-value="100365.77000000002">$ 100.366</td><td data-value="0.15888257766051642">15,9%</td><td data-value="35.00000000000001">35,0%</td></tr><tr><td data-value="La Ventanita de Constitucion II">La Ventanita de Constitucion II</td><td data-value="Mayorista">Mayorista</td><td data-value="602102.8">$ 602.103</td><td data-value="0.004996679124654827">0,5%</td><td data-value="130800.80000000002">$ 130.801</td><td data-value="0.21723997961809846">21,7%</td><td data-value="30.000000000000004">30,0%</td></tr><tr><td data-value="Panaderia Villa Crespo II">Panaderia Villa Crespo II</td><td data-value="Mayorista">Mayorista</td><td data-value="594290.1200000001">$ 594.290</td><td data-value="0.004931843925310781">0,5%</td><td data-value="114697.12">$ 114.697</td><td data-value="0.1929985307512768">19,3%</td><td data-value="32">32,0%</td></tr><tr><td data-value="El Almacen de Caballito II">El Almacen de Caballito II</td><td data-value="Mayorista">Mayorista</td><td data-value="539963.1200000001">$ 539.963</td><td data-value="0.0044809996727925685">0,4%</td><td data-value="129604.12">$ 129.604</td><td data-value="0.24002402238138035">24,0%</td><td data-value="32">32,0%</td></tr><tr><td data-value="Tostado Boedo II">Tostado Boedo II</td><td data-value="Mayorista">Mayorista</td><td data-value="534698.3999999999">$ 534.698</td><td data-value="0.004437309265571154">0,4%</td><td data-value="117745.40000000001">$ 117.745</td><td data-value="0.2202090000643354">22,0%</td><td data-value="30">30,0%</td></tr><tr><td data-value="Bar Belgrano">Bar Belgrano</td><td data-value="Mayorista">Mayorista</td><td data-value="439851.70999999996">$ 439.852</td><td data-value="0.0036502036816648724">0,4%</td><td data-value="75730.70999999999">$ 75.731</td><td data-value="0.17217327630714452">17,2%</td><td data-value="35">35,0%</td></tr><tr><td data-value="Usina Boedo">Usina Boedo</td><td data-value="Mayorista">Mayorista</td><td data-value="436273.82">$ 436.274</td><td data-value="0.003620511794709171">0,4%</td><td data-value="91459.81999999999">$ 91.460</td><td data-value="0.20963857056561402">21,0%</td><td data-value="32">32,0%</td></tr><tr><td data-value="El Almacen de Almagro">El Almacen de Almagro</td><td data-value="Mayorista">Mayorista</td><td data-value="259480.98000000004">$ 259.481</td><td data-value="0.002153358522848551">0,2%</td><td data-value="51477.979999999996">$ 51.478</td><td data-value="0.19838825951713296">19,8%</td><td data-value="32">32,0%</td></tr></tbody></table></div>
+</main>
+<footer class="page-footer">Sawy · reporte para Tostadero Ruta 9</footer>
+<script>(function () {
+  var params = new URLSearchParams(location.search);
+  if (params.get("print") === "1") {
+    window.addEventListener("load", function () { window.print(); });
+  }
+
+  var currentFile = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll("[data-print-target]").forEach(function (btn) {
+    if (btn.getAttribute("data-print-target") === currentFile) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.print();
+      });
+    }
+  });
+
+  document.querySelectorAll(".data-table").forEach(function (tbl) {
+    var headers = tbl.querySelectorAll("th");
+    headers.forEach(function (th, colIndex) {
+      th.addEventListener("click", function () {
+        var tbody = tbl.querySelector("tbody");
+        var rows = Array.from(tbody.querySelectorAll("tr"));
+        var asc = th.getAttribute("data-sort") !== "asc";
+        headers.forEach(function (h) { h.removeAttribute("data-sort"); });
+        th.setAttribute("data-sort", asc ? "asc" : "desc");
+        rows.sort(function (a, b) {
+          var av = a.children[colIndex].getAttribute("data-value");
+          var bv = b.children[colIndex].getAttribute("data-value");
+          var an = parseFloat(av);
+          var bn = parseFloat(bv);
+          var cmp = !isNaN(an) && !isNaN(bn) ? an - bn : String(av).localeCompare(String(bv), "es");
+          return asc ? cmp : -cmp;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+      });
+    });
+  });
+})();</script>
+</body>
+</html>

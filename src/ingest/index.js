@@ -3,13 +3,6 @@ import { join } from "node:path";
 import { parseCsv } from "../lib/csv.js";
 import { parseFecha, parseNumero, parseBooleanSN } from "../lib/parse.js";
 
-/**
- * Lee y tipa los 5 CSV del export del ERP. No aplica ninguna regla de
- * negocio todavia (eso es responsabilidad de src/clean) — esta capa solo
- * convierte texto a los tipos correctos (numero, fecha, booleano).
- *
- * @param {string} dataDir carpeta con los 5 .csv (export_erp/)
- */
 export function ingestar(dataDir) {
   const leer = (archivo) => readFileSync(join(dataDir, archivo), "utf-8");
 

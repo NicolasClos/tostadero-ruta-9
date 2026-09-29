@@ -1,33 +1,20 @@
 import { fmtMoney, fmtPct } from "../lib/parse.js";
 
-// Umbrales de negocio. Son juicios de valor sobre "cuanto es demasiado" para
-// un tostadero chico — no son constantes universales. Para otro rubro/cliente
-// hay que revisarlos a mano (ver respuestas.md, pregunta 2).
-const UMBRAL_CONCENTRACION_CLIENTE = 0.25; // 25% de la facturacion en un solo cliente
-const UMBRAL_DEVOLUCION_PRODUCTO = 0.03; // 3% de lo facturado en un producto, devuelto
-const UMBRAL_MARGEN_DELGADO = 0.15; // 15% de margen bruto
-const UMBRAL_PARTICIPACION_RELEVANTE = 0.02; // por debajo de esto, ignoramos productos marginales
+const UMBRAL_CONCENTRACION_CLIENTE = 0.25;
+const UMBRAL_DEVOLUCION_PRODUCTO = 0.03;
+const UMBRAL_MARGEN_DELGADO = 0.15;
+const UMBRAL_PARTICIPACION_RELEVANTE = 0.02;
 
 function severidadRank(s) {
   return { critical: 3, serious: 2, warning: 1, info: 0 }[s] ?? 0;
 }
 
-/**
- * Genera insights (estado del negocio) y, entre ellos, cuales tienen una
- * accion operativa concreta asociada. Cada regla es independiente y puede
- * no disparar si los datos no ameritan — no hay texto fijo, todo numero
- * citado sale de `metrics`.
- */
 export function generarInsights(metrics) {
   const insights = [];
   const { mensual, porProducto, porCanal, porCliente, gastosPorConcepto, devoluciones } = metrics;
   const primero = mensual[0];
   const ultimo = mensual[mensual.length - 1];
 
-  // 1) Balance del período completo: cuantos meses cerraron en rojo y cual
-  // es el acumulado. Mirar solo primero-vs-ultimo mes esconde meses malos
-  // en el medio (y este dataset tiene justamente ese caso: 5 de 6 meses
-  // negativos aunque el ultimo mes no sea el peor).
   if (mensual.length > 0) {
     const mesesNegativos = mensual.filter((m) => m.resultadoNeto < 0);
     const resultadoAcumulado = mensual.reduce((a, m) => a + m.resultadoNeto, 0);
@@ -57,7 +44,6 @@ export function generarInsights(metrics) {
     }
   }
 
-  // 2) Concentracion de cliente (riesgo + poder de negociacion invertido).
   const topCliente = porCliente[0];
   if (topCliente && topCliente.participacionIngresos > UMBRAL_CONCENTRACION_CLIENTE) {
     insights.push({
@@ -69,7 +55,6 @@ export function generarInsights(metrics) {
     });
   }
 
-  // 3) Producto ancla: ¿"Blend Casa" es realmente el que más deja?
   const blend = porProducto.filter((p) => p.codigo.includes("BLEND"));
   const blend1kg = porProducto.find((p) => p.codigo === "CAF-BLEND-1K");
   const margenBlend = blend.reduce((a, p) => a + p.margenBruto, 0);
@@ -96,19 +81,17 @@ export function generarInsights(metrics) {
     });
   }
 
-  // 4) Canal online: ¿realmente es marginal?
   const online = porCanal.find((c) => c.canal === "Ecommerce");
   if (online) {
     insights.push({
       id: "canal-online",
       severity: "info",
       titulo: `El canal online pesa ${fmtPct(online.participacionIngresos)} de la facturación`,
-      detalle: `Confirma lo que Sofía intuye: la venta online (${fmtMoney(online.ingresos)} en el período, margen bruto ${fmtPct(online.margenBrutoPct)}) es marginal frente al resto de los canales.`,
+      detalle: `La venta online (${fmtMoney(online.ingresos)} en el período, margen bruto ${fmtPct(online.margenBrutoPct)}) es marginal frente al resto de los canales.`,
       accion: null,
     });
   }
 
-  // 5) Devoluciones concentradas en un producto o cliente puntual.
   const productosConDevolucion = porProducto
     .filter((p) => p.devolucionPct > UMBRAL_DEVOLUCION_PRODUCTO)
     .sort((a, b) => b.devolucionPct - a.devolucionPct);
@@ -131,8 +114,6 @@ export function generarInsights(metrics) {
     });
   }
 
-  // 6) Flete: Sofia lo paga y no lo cobra. Se muestra su peso siempre,
-  // tematicamente central a la pregunta de Sofia, dispare o no otra regla.
   const flete = gastosPorConcepto.find((g) => g.concepto.toLowerCase().includes("flete"));
   if (flete && primero && ultimo) {
     const ingresosTotalPeriodo = mensual.reduce((a, m) => a + m.ingresos, 0);
@@ -150,7 +131,6 @@ export function generarInsights(metrics) {
     });
   }
 
-  // 7) Margen delgado en productos con participacion relevante (candidatos a repricing).
   const margenDelgado = porProducto
     .filter((p) => p.margenBrutoPct < UMBRAL_MARGEN_DELGADO && p.participacionIngresos > UMBRAL_PARTICIPACION_RELEVANTE)
     .sort((a, b) => a.margenBrutoPct - b.margenBrutoPct);
@@ -165,10 +145,7 @@ export function generarInsights(metrics) {
     });
   }
 
-  const estadoDeNegocio = insights;
-  const accionesSemana = insights
-    .filter((i) => i.accion)
-    .sort((a, b) => severidadRank(b.severity) - severidadRank(a.severity));
+  const accionables = insights.sort((a, b) => severidadRank(b.severity) - severidadRank(a.severity));
 
-  return { estadoDeNegocio, accionesSemana };
+  return { accionables };
 }

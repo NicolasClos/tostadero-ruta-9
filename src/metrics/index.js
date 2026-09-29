@@ -8,17 +8,10 @@ function safeDiv(a, b) {
   return b === 0 ? 0 : a / b;
 }
 
-/** Lista de periodos "MM/AAAA" presentes en las ventas, ordenados cronologicamente. */
 export function listaPeriodos(ventas) {
   return [...new Set(ventas.map((v) => v.periodo))].sort(compararPeriodos);
 }
 
-/**
- * Serie mensual: ingresos (neto FAC+NC), unidades, costo, margen bruto,
- * gastos operativos del mes y resultado neto (margen bruto - gastos operativos).
- * Los gastos operativos NO se prorratean por producto (Sofia aclara que el
- * sistema no se lo permite sacar asi) — se restan una sola vez a nivel mes.
- */
 export function metricasMensuales(ventas, gastos) {
   const periodos = listaPeriodos(ventas);
   return periodos.map((periodo) => {
@@ -57,7 +50,6 @@ export function metricasMensuales(ventas, gastos) {
   });
 }
 
-/** Agregado por producto (ya con codigos legados resueltos). */
 export function metricasPorProducto(ventas) {
   const ingresosTotales = sum(ventas, (v) => v.importe);
   const codigos = [...new Set(ventas.map((v) => v.codigoProductoResuelto))];
@@ -92,7 +84,6 @@ export function metricasPorProducto(ventas) {
   return filas.sort((a, b) => b.margenBruto - a.margenBruto);
 }
 
-/** Agregado por canal comercial (Distribuidor/Mayorista/Local/Ecommerce/...). */
 export function metricasPorCanal(ventas) {
   const ingresosTotales = sum(ventas, (v) => v.importe);
   const canales = [...new Set(ventas.map((v) => v.canal))];
@@ -113,7 +104,6 @@ export function metricasPorCanal(ventas) {
   return filas.sort((a, b) => b.ingresos - a.ingresos);
 }
 
-/** Agregado por cliente, para ver concentracion. */
 export function metricasPorCliente(ventas) {
   const ingresosTotales = sum(ventas, (v) => v.importe);
   const codigos = [...new Set(ventas.map((v) => v.codigoCliente))];
@@ -146,7 +136,6 @@ export function metricasPorCliente(ventas) {
   return filas.sort((a, b) => b.ingresos - a.ingresos);
 }
 
-/** Gastos operativos por concepto, con su evolucion primer vs ultimo periodo. */
 export function metricasGastosPorConcepto(gastos) {
   const periodos = [...new Set(gastos.map((g) => g.periodo))].sort(compararPeriodos);
   const primerPeriodo = periodos[0];
@@ -155,11 +144,11 @@ export function metricasGastosPorConcepto(gastos) {
 
   return conceptos
     .map((concepto) => {
-      const deiConcepto = gastos.filter((g) => g.concepto === concepto);
+      const delConcepto = gastos.filter((g) => g.concepto === concepto);
       const porPeriodo = Object.fromEntries(
-        periodos.map((p) => [p, sum(deiConcepto.filter((g) => g.periodo === p), (g) => g.importe)])
+        periodos.map((p) => [p, sum(delConcepto.filter((g) => g.periodo === p), (g) => g.importe)])
       );
-      const total = sum(deiConcepto, (g) => g.importe);
+      const total = sum(delConcepto, (g) => g.importe);
       const inicial = porPeriodo[primerPeriodo] ?? 0;
       const final = porPeriodo[ultimoPeriodo] ?? 0;
       return {
@@ -174,7 +163,6 @@ export function metricasGastosPorConcepto(gastos) {
     .sort((a, b) => b.total - a.total);
 }
 
-/** Resumen global de notas de credito (devoluciones). */
 export function resumenDevoluciones(ventas) {
   const notas = ventas.filter((v) => v.tipoComprobante === "NC");
   const ventasBrutas = sum(
@@ -191,7 +179,6 @@ export function resumenDevoluciones(ventas) {
   };
 }
 
-/** Corre todas las agregaciones de una sola vez. */
 export function calcularMetricas(ventasEnriquecidas, gastos) {
   return {
     mensual: metricasMensuales(ventasEnriquecidas, gastos),

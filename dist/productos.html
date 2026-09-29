@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tostadero Ruta 9 — Productos</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #ffffff;
+  --surface-1: #ffffff;
+  --surface-tint-a: #fff0f7;
+  --surface-tint-b: #fff7fa;
+  --ink: #2a0a1c;
+  --ink-dark: #1e0714;
+  --text-primary: #2a0a1c;
+  --text-secondary: #7a5566;
+  --text-muted: #a68a95;
+  --border: rgba(42,10,28,0.10);
+  --border-strong: rgba(42,10,28,0.22);
+  --pink: #ff3d80;
+  --orange: #ff7a45;
+  --gradient: linear-gradient(96deg, var(--pink) 0%, var(--orange) 100%);
+  --series-ingresos: #ff3d80;
+  --series-margen: #ff7a45;
+  --series-gastos: #2a0a1c;
+  --series-canal-1: #ff3d80;
+  --series-canal-2: #ff7a45;
+  --series-canal-3: #2a0a1c;
+  --series-canal-4: #c98aa0;
+  --status-critical: #c8102e;
+  --status-critical-bg: rgba(200,16,46,0.10);
+  --status-critical-ring: rgba(200,16,46,0.32);
+  --status-warning: #954416;
+  --status-warning-bg: rgba(255,122,69,0.12);
+  --status-warning-ring: rgba(255,122,69,0.34);
+  --status-info: #2f7a4f;
+  --status-info-bg: rgba(47,122,79,0.10);
+  --status-info-ring: rgba(47,122,79,0.30);
+  --diverging-positive: #2f7a4f;
+  --diverging-negative: #c8102e;
+  --card-shadow: 0 1px 2px rgba(42,10,28,0.04), 0 12px 28px -14px rgba(42,10,28,0.28);
+  --footer-height: 3.25rem;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+h1, h2, h3 { font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+h1 { font-size: 32px; }
+h2 { font-size: 21px; padding-top: 0.25rem; }
+h3 { font-size: 16px; margin-top: 1.5rem; letter-spacing: -0.01em; }
+code { background: var(--surface-tint-a); padding: 0.1rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+.topbar {
+  background: var(--surface-0);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.brand { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-mark {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sep { color: var(--text-muted); }
+.brand-client { font-size: 14px; color: var(--text-secondary); }
+.topbar-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.topbar-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+.topbar-links a:hover { color: var(--ink); }
+.topbar-links a.active { color: var(--pink); font-weight: 600; }
+.page-head {
+  padding: 2rem 0 0.5rem;
+  background: linear-gradient(180deg, var(--surface-tint-a) 0%, var(--surface-tint-b) 60%, var(--surface-0) 100%);
+}
+.page-head-inner { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+.eyebrow { font-size: 13px; color: var(--pink); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+.page-head-subtitle { color: var(--text-secondary); font-size: 14px; margin: 0.35rem 0 0; }
+.hero-tldr { display: flex; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 0.85rem 1.25rem; margin-top: 1.25rem; }
+.hero-tldr-text { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.page-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.1rem; }
+.btn-ghost { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 16px; text-decoration: none; }
+.btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+.page-main { max-width: 960px; margin: 0 auto; padding: 0.5rem 1.5rem calc(var(--footer-height) + 2rem); }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 1rem 0; }
+.kpi-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); padding: 1.1rem; }
+.kpi-label { font-size: 13px; color: var(--text-secondary); }
+.kpi-value { font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }
+.kpi-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.chart-caption { font-size: 13px; color: var(--text-muted); margin-top: 0.5rem; }
+.chart-label { font-size: 12px; fill: var(--text-secondary); }
+.chart-value { font-size: 12px; fill: var(--ink); font-weight: 600; }
+.chart-axis-label { font-size: 11px; fill: var(--text-muted); }
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-zero { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.table-wrap { overflow-x: auto; margin-top: 1rem; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th, .data-table td { text-align: left; padding: 10px 14px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+.data-table th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; }
+.data-table th:hover { color: var(--pink); }
+.data-table th[data-sort="asc"]::after { content: " ▲"; font-size: 10px; color: var(--pink); }
+.data-table th[data-sort="desc"]::after { content: " ▼"; font-size: 10px; color: var(--pink); }
+.data-table tr:last-child td { border-bottom: none; }
+.insight-list { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
+.insight-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--card-shadow); border-left: 4px solid var(--border); padding: 1.1rem 1.25rem; }
+.insight-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.insight-index { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.insight-title { font-size: 16px; margin: 0; }
+.insight-detail { color: var(--text-secondary); margin: 0.5rem 0 0; }
+.insight-action { margin: 0.6rem 0 0; color: var(--text-secondary); }
+.insight-action-label { color: var(--pink); font-weight: 700; margin-right: 4px; }
+.badge { font-size: 12px; padding: 3px 12px; border-radius: 999px; font-weight: 600; }
+.callout { border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--card-shadow); padding: 1.1rem 1.25rem; font-size: 14px; margin-top: 1rem; }
+.callout ul { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+.callout-warning { background: var(--status-warning-bg); color: var(--ink); }
+.callout-ok { background: var(--status-info-bg); color: var(--ink); }
+.callout-info { background: var(--surface-1); color: var(--ink); }
+.page-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-dark);
+  color: var(--surface-tint-a);
+  font-size: 12px;
+}
+.print-section { padding: 2rem 0; border-bottom: 0.5px solid var(--border); }
+.print-section:last-child { border-bottom: none; }
+@media print {
+  .topbar, .page-footer, .page-actions { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; }
+  .page-head { background: none; padding-top: 0; }
+  .page-main { padding-bottom: 1rem; }
+  .kpi-card, .insight-card, .callout, .table-wrap, .hero-tldr { box-shadow: none; break-inside: avoid; }
+  .print-section { break-after: page; }
+  .print-section:last-child { break-after: auto; }
+}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">Sawy</span><span class="brand-sep">·</span><span class="brand-client">Tostadero Ruta 9</span>
+    </a>
+    <div class="topbar-links"><a href="index.html">Resumen</a><a href="acciones.html">Acciones</a><a href="gastos.html">Gastos</a><a href="productos.html" class="active" aria-current="page">Productos</a><a href="clientes.html">Clientes y canales</a><a href="devoluciones.html">Devoluciones</a><a href="notas.html">Notas y supuestos</a></div>
+  </div>
+</nav>
+<header class="page-head">
+  <div class="page-head-inner">
+    
+    <h1>Productos</h1>
+    
+    
+    <div class="page-actions">
+  <a href="index.html?print=1" class="btn-ghost" data-print-target="index.html">⬇ Resumen (PDF)</a>
+  <a href="reporte-completo.html?print=1" class="btn-ghost" data-print-target="reporte-completo.html">⬇ Reporte completo (PDF)</a>
+</div>
+  </div>
+</header>
+<main class="page-main">
+<h3>Margen bruto por producto</h3>
+  <svg viewBox="0 0 680 288" width="100%" height="288" role="img" aria-label="Margen bruto por producto, de mayor a menor"><line x1="240.0" y1="8" x2="240.0" y2="280" class="chart-grid"></line><line x1="326.0" y1="8" x2="326.0" y2="280" class="chart-grid"></line><line x1="412.0" y1="8" x2="412.0" y2="280" class="chart-grid"></line><line x1="498.0" y1="8" x2="498.0" y2="280" class="chart-grid"></line><line x1="584.0" y1="8" x2="584.0" y2="280" class="chart-grid"></line><text x="230" y="29.0" text-anchor="end" class="chart-label">Blend Casa 1 kg</text>
+      <rect x="240" y="14.0" width="344.0" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="592.0" y="29.0" class="chart-value">$ 8.386.644</text><text x="230" y="63.0" text-anchor="end" class="chart-label">Etiopia Yirgacheffe 250 g</text>
+      <rect x="240" y="48.0" width="313.6" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="561.6" y="63.0" class="chart-value">$ 7.644.478</text><text x="230" y="97.0" text-anchor="end" class="chart-label">Colombia Huila 250 g</text>
+      <rect x="240" y="82.0" width="219.6" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="467.6" y="97.0" class="chart-value">$ 5.353.292</text><text x="230" y="131.0" text-anchor="end" class="chart-label">Blend Casa 250 g</text>
+      <rect x="240" y="116.0" width="144.2" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="392.2" y="131.0" class="chart-value">$ 3.515.177</text><text x="230" y="165.0" text-anchor="end" class="chart-label">Brasil Cerrado 1 kg</text>
+      <rect x="240" y="150.0" width="85.5" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="333.5" y="165.0" class="chart-value">$ 2.083.609</text><text x="230" y="199.0" text-anchor="end" class="chart-label">Brasil Cerrado 250 g</text>
+      <rect x="240" y="184.0" width="64.2" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="312.2" y="199.0" class="chart-value">$ 1.565.029</text><text x="230" y="233.0" text-anchor="end" class="chart-label">Descafeinado 250 g</text>
+      <rect x="240" y="218.0" width="61.2" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="309.2" y="233.0" class="chart-value">$ 1.491.693</text><text x="230" y="267.0" text-anchor="end" class="chart-label">Capsulas compatibles x10</text>
+      <rect x="240" y="252.0" width="51.2" height="22" rx="4" fill="var(--series-margen)"></rect>
+      <text x="299.2" y="267.0" class="chart-value">$ 1.247.055</text></svg>
+  <div class="table-wrap"><table class="data-table"><thead><tr><th>Producto</th><th>Rubro</th><th>Facturación</th><th>Margen bruto</th><th>Margen %</th><th>% del total</th><th>Devoluciones</th></tr></thead><tbody><tr><td data-value="Blend Casa 1 kg">Blend Casa 1 kg</td><td data-value="CAFE">CAFE</td><td data-value="51061316.15000001">$ 51.061.316</td><td data-value="8386644.150000002">$ 8.386.644</td><td data-value="0.16424653303810305">16,4%</td><td data-value="0.4237432752083289">42,4%</td><td data-value="1252938.4000000001">$ 1.252.938 (2,4%)</td></tr><tr><td data-value="Brasil Cerrado 1 kg">Brasil Cerrado 1 kg</td><td data-value="CAFE">CAFE</td><td data-value="14148332.249999996">$ 14.148.332</td><td data-value="2083609.2500000005">$ 2.083.609</td><td data-value="0.14726889453702227">14,7%</td><td data-value="0.11741296735749382">11,7%</td><td data-value="1123984.1600000001">$ 1.123.984 (7,4%)</td></tr><tr><td data-value="Etiopia Yirgacheffe 250 g">Etiopia Yirgacheffe 250 g</td><td data-value="CAFE">CAFE</td><td data-value="14091080.779999971">$ 14.091.081</td><td data-value="7644477.780000022">$ 7.644.478</td><td data-value="0.5425047162351189">54,3%</td><td data-value="0.11693785376392653">11,7%</td><td data-value="0">—</td></tr><tr><td data-value="Blend Casa CAJA X 6 (1kg c/u)">Blend Casa CAJA X 6 (1kg c/u)</td><td data-value="CAFE">CAFE</td><td data-value="13117710.999999998">$ 13.117.711</td><td data-value="514380">$ 514.380</td><td data-value="0.03921263397249719">3,9%</td><td data-value="0.10886013603815657">10,9%</td><td data-value="0">—</td></tr><tr><td data-value="Colombia Huila 250 g">Colombia Huila 250 g</td><td data-value="CAFE">CAFE</td><td data-value="9542700.769999988">$ 9.542.701</td><td data-value="5353291.769999989">$ 5.353.292</td><td data-value="0.560982880950169">56,1%</td><td data-value="0.0791921474709742">7,9%</td><td data-value="0">—</td></tr><tr><td data-value="Blend Casa 250 g">Blend Casa 250 g</td><td data-value="CAFE">CAFE</td><td data-value="6475331.580000018">$ 6.475.332</td><td data-value="3515176.5800000136">$ 3.515.177</td><td data-value="0.5428566146106149">54,3%</td><td data-value="0.053736926868641434">5,4%</td><td data-value="0">—</td></tr><tr><td data-value="Brasil Cerrado 250 g">Brasil Cerrado 250 g</td><td data-value="CAFE">CAFE</td><td data-value="2890008.5200000023">$ 2.890.009</td><td data-value="1565028.5200000016">$ 1.565.029</td><td data-value="0.5415307633764348">54,2%</td><td data-value="0.02398335507152367">2,4%</td><td data-value="0">—</td></tr><tr><td data-value="Descafeinado 250 g">Descafeinado 250 g</td><td data-value="CAFE">CAFE</td><td data-value="2830347.799999998">$ 2.830.348</td><td data-value="1491692.8000000003">$ 1.491.693</td><td data-value="0.5270351580113233">52,7%</td><td data-value="0.023488247800496364">2,3%</td><td data-value="0">—</td></tr><tr><td data-value="Capsulas compatibles x10">Capsulas compatibles x10</td><td data-value="CAFE">CAFE</td><td data-value="2390223.5299999993">$ 2.390.224</td><td data-value="1247054.5299999998">$ 1.247.055</td><td data-value="0.5217313420054902">52,2%</td><td data-value="0.01983578222125817">2,0%</td><td data-value="0">—</td></tr><tr><td data-value="Taza ceramica logo">Taza ceramica logo</td><td data-value="ACCESORIOS">ACCESORIOS</td><td data-value="2172525.6700000013">$ 2.172.526</td><td data-value="1147299.6700000002">$ 1.147.300</td><td data-value="0.5280948740182202">52,8%</td><td data-value="0.018029169874423018">1,8%</td><td data-value="0">—</td></tr><tr><td data-value="Filtros de papel x 100">Filtros de papel x 100</td><td data-value="ACCESORIOS">ACCESORIOS</td><td data-value="1781015.4400000009">$ 1.781.015</td><td data-value="489723.4400000001">$ 489.723</td><td data-value="0.2749686661896653">27,5%</td><td data-value="0.014780138324777653">1,5%</td><td data-value="0">—</td></tr></tbody></table></div>
+</main>
+<footer class="page-footer">Sawy · reporte para Tostadero Ruta 9</footer>
+<script>(function () {
+  var params = new URLSearchParams(location.search);
+  if (params.get("print") === "1") {
+    window.addEventListener("load", function () { window.print(); });
+  }
+
+  var currentFile = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll("[data-print-target]").forEach(function (btn) {
+    if (btn.getAttribute("data-print-target") === currentFile) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.print();
+      });
+    }
+  });
+
+  document.querySelectorAll(".data-table").forEach(function (tbl) {
+    var headers = tbl.querySelectorAll("th");
+    headers.forEach(function (th, colIndex) {
+      th.addEventListener("click", function () {
+        var tbody = tbl.querySelector("tbody");
+        var rows = Array.from(tbody.querySelectorAll("tr"));
+        var asc = th.getAttribute("data-sort") !== "asc";
+        headers.forEach(function (h) { h.removeAttribute("data-sort"); });
+        th.setAttribute("data-sort", asc ? "asc" : "desc");
+        rows.sort(function (a, b) {
+          var av = a.children[colIndex].getAttribute("data-value");
+          var bv = b.children[colIndex].getAttribute("data-value");
+          var an = parseFloat(av);
+          var bn = parseFloat(bv);
+          var cmp = !isNaN(an) && !isNaN(bn) ? an - bn : String(av).localeCompare(String(bv), "es");
+          return asc ? cmp : -cmp;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+      });
+    });
+  });
+})();</script>
+</body>
+</html>

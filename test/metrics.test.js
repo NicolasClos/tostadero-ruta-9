@@ -13,9 +13,6 @@ function closeTo(actual, expected, eps = 1e-6) {
   assert.ok(Math.abs(actual - expected) < eps, `esperaba ${expected}, obtuve ${actual}`);
 }
 
-// Fixture ya "enriquecido" (como lo deja src/clean), pensado para poder
-// calcular todo a mano: 2 meses, 2 productos, 3 clientes en 3 canales
-// distintos, y una nota de credito.
 function fixtureVentas() {
   const base = {
     descripcionProducto: undefined,
@@ -63,17 +60,16 @@ test("metricasPorProducto agrega a traves de meses y calcula devolucion % sobre 
   const x1 = filas.find((f) => f.codigo === "X1");
   const x2 = filas.find((f) => f.codigo === "X2");
 
-  closeTo(x1.ingresos, 17000); // 10000 - 2000 + 9000
+  closeTo(x1.ingresos, 17000);
   closeTo(x1.margenBruto, 10200);
   closeTo(x1.devolucionImporte, 2000);
-  closeTo(x1.devolucionPct, 2000 / 19000); // sobre ventas brutas FAC (10000+9000)
+  closeTo(x1.devolucionPct, 2000 / 19000);
   closeTo(x1.participacionIngresos, 17000 / 25600);
 
   closeTo(x2.ingresos, 8600);
   closeTo(x2.margenBruto, 3500);
   closeTo(x2.devolucionImporte, 0);
 
-  // ordenado por margen bruto descendente
   assert.deepEqual(filas.map((f) => f.codigo), ["X1", "X2"]);
 });
 
@@ -90,7 +86,6 @@ test("metricasPorCanal agrega por condicion comercial del cliente", () => {
   closeTo(distribuidor.ingresos, 5000);
   closeTo(local.ingresos, 3600);
 
-  // ordenado por ingresos descendente
   assert.deepEqual(filas.map((f) => f.canal), ["Mayorista", "Distribuidor", "Local"]);
 });
 
@@ -101,7 +96,7 @@ test("metricasPorCliente pondera la bonificacion por importe facturado (solo FAC
 
   closeTo(k1.ingresos, 17000);
   closeTo(k1.bonifPromedioPonderada, 0);
-  closeTo(k2.bonifPromedioPonderada, 20); // unica venta de K2 tiene 20% de bonificacion
+  closeTo(k2.bonifPromedioPonderada, 20);
 });
 
 test("metricasGastosPorConcepto calcula variacion entre el primer y el ultimo periodo", () => {
@@ -113,7 +108,6 @@ test("metricasGastosPorConcepto calcula variacion entre el primer y el ultimo pe
   closeTo(flete.variacionPct, (800 - 500) / 500);
   closeTo(alquiler.variacionPct, 0);
 
-  // ordenado por total descendente
   assert.deepEqual(filas.map((f) => f.concepto), ["Alquiler", "Flete"]);
 });
 
@@ -122,5 +116,5 @@ test("resumenDevoluciones calcula el % sobre ventas brutas totales (todos los pr
   assert.equal(resumen.cantidadNotas, 1);
   closeTo(resumen.totalImporte, 2000);
   closeTo(resumen.totalUnidades, 2);
-  closeTo(resumen.pctSobreVentasBrutas, 2000 / 27600); // FAC: 10000+5000+9000+3600
+  closeTo(resumen.pctSobreVentasBrutas, 2000 / 27600);
 });
