@@ -112,14 +112,14 @@ function topbarHtml(activeId) {
 </nav>`;
 }
 
-function pageHead({ eyebrow, title, subtitle, extraHtml }) {
+function pageHead({ eyebrow, title, subtitle, extraHtml, showActions = false }) {
   return `<header class="page-head">
   <div class="page-head-inner">
     ${eyebrow ? `<p class="eyebrow">${escapeHtml(eyebrow)}</p>` : ""}
     <h1>${escapeHtml(title)}</h1>
     ${subtitle ? `<p class="page-head-subtitle">${escapeHtml(subtitle)}</p>` : ""}
     ${extraHtml || ""}
-    ${PAGE_ACTIONS_HTML}
+    ${showActions ? PAGE_ACTIONS_HTML : ""}
   </div>
 </header>`;
 }
@@ -342,6 +342,7 @@ export function renderSite({ metrics, insights, warnings, meta }) {
       title: "Tostadero Ruta 9",
       subtitle: `Período analizado: ${primero.label} a ${ultimo.label} · generado el ${meta.generadoEn}`,
       extraHtml: heroTldrHtml,
+      showActions: true,
     }),
     bodyHtml: resumenBody,
   });
