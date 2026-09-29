@@ -1,0 +1,16 @@
+{
+  "name": "sawy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramienta de visibilidad de negocio para Tostadero Ruta 9, a partir de los exports del ERP.",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "node src/build.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
